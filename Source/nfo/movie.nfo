@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<movie>
+    <title>Regional title</title>
+    <originaltitle>Original title</originaltitle>
+    <ratings>
+        <rating name="" max="10" default="">
+            <value></value>
+            <votes></votes>
+        </rating>
+    </ratings>
+    <userrating>0</userrating>
+    <plot>Description</plot>
+    <thumb aspect="poster" preview="cover.png"></thumb> 
+    <genre>-</genre>
+    <country>-</country>
+    <director>-</director>
+    <premiered>-</premiered>
+    <studio></studio>
+    <actor>
+        <name></name>
+        <role></role>
+        <order></order>
+        <thumb></thumb>
+    </actor>
+</movie>

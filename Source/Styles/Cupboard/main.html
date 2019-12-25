@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="Style Home Library r57zone"/>
+<title>Style</title>
+<link rel="stylesheet" href="style.css">
+<style type="text/css">
+html,body{padding:0;margin:0;height:100%;font-family:tahoma;overflow:hidden;}
+:focus{outline:0;}
+body{
+	background-image:url(images/background.jpg);
+	-ms-overflow-style: none; 
+	background-color:#cd9a59;
+}
+
+#cover
+{
+	display:inline-block;
+	height:189px;
+	width:140px;
+	margin:0 10px;
+	vertical-align: bottom;
+	padding-bottom:47px;
+}
+
+#cover span{
+	display:table-cell;
+	height:inherit;
+	vertical-align:bottom;
+}
+
+#cover img
+{
+	margin-left:20px;
+	cursor:pointer;
+	width:100px;
+	box-shadow: 0px 0px 25px 4px rgba(0,0,0,0.50);
+	outline: 1px solid #303030;
+	background-color:#3c3c3c;
+}
+
+#cover img:hover
+{
+	box-shadow: 0 0 25px 4px rgba(0,0,0,0.70);
+}
+
+#cover #name
+{
+	cursor:pointer;
+	margin-top:6px;
+	padding:1px 3px;
+	font-size:10px;
+	width:calc(100% - 6);
+	height:12px;
+	color:#422209;
+	border-radius:3px;
+	overflow:hidden;
+	font-weight:bold;
+	text-transform:uppercase;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+}
+
+#cupboard
+{
+	margin-top:45px;
+	height:calc(100% - 45px);
+	overflow-y:scroll;
+	background-image:url(images/left-shadow.png), url(images/right-shadow.png); 
+	background-repeat: repeat-y, repeat-y; 
+	background-size: repeat-y, repeat-y; 
+	background-position: left top, right top;
+}
+
+#shelves-edges
+{
+	background-image:url(images/shelf-left.png), url(images/shelf-right.png); 
+	background-repeat: repeat-y, repeat-y; 
+	background-size: repeat-y, repeat-y; 
+	background-position: left top, right top;
+}
+
+#items
+{
+	margin:0 29px;
+	background-image:url(images/shelf-center.png);
+	text-align: center;
+}
+
+#shelve-last-shadow
+{
+	margin:0 29px;
+	background-image:url(images/last-shadow.png);
+	height:116px;
+}
+
+#header
+{
+	position:fixed;
+	top:0;
+	width:100%;
+	font-size:13px;
+	height:44px;
+	border-bottom:1px solid #6a4318;
+	background-image:url(images/menu.png);
+	overflow:hidden;
+	box-shadow: 0px 6px 26px -4px rgba(0,0,0,0.61);
+}
+
+#menu{float:left;}
+#menu a
+{
+	display:inline-block;
+	text-decoration:none;
+	padding:5px 8px;
+	margin:8px 4px 0 0;
+	background-image:url(images/button.png);
+	background-color:#ac7737;
+	border-radius:5px;
+	border:1px solid #8d6833;
+	border-top:1px solid #574224;
+	color:white;
+}
+#menu a:first-child{margin-left:12px;}
+#menu a:hover{background-color:#97672d;}
+
+#search{float:right;}
+#search-input
+{
+	color:#323232;
+	margin:9px 10px 0 0;
+	background:transparent;
+	background-image:url(images/input.png);
+	border:1px solid #8d6833;
+	border-top:1px solid #574224;
+	border-radius:5px;
+	padding:5px 8px 4px 8px;
+}
+</style>
+<script type="text/javascript">
+	function search()
+	{
+		var query = document.getElementById('search-input').value.toLowerCase();
+		var items = document.getElementById('items').children;
+		for(i = 0; i < items.length; i++)
+		{
+			var itemName = items[i].children[1].innerHTML.toLowerCase();
+			
+			if (itemName.indexOf(query) != -1)
+				items[i].style.display = 'inline-block';
+			else
+				items[i].style.display = 'none';
+		}
+		//document.location='#Search=' + query;
+	}
+
+  document.addEventListener('DOMContentLoaded', function(){
+	if (navigator.language.toLowerCase() == 'ru-ru')
+		document.getElementById('search-input').setAttribute('placeholder', 'Поиск...');
+  });
+</script>
+</head>
+<body oncontextmenu="return false;" onselectstart="return false;">
+	<div id="header">
+		<div id="menu">
+			<!--<a href="#">Фильмы</a> <a href="#">Сериалы</a> <a href="#">Игры</a>-->
+		</div>
+		<div id="search">
+			<input id="search-input" onkeyup="search();" value="" type="text" placeholder="Search..." />
+		</div>
+	</div>
+	<div id="cupboard">
+		<div id="shelves-edges">
+			<div id="items">
+				<!--<div id="cover"><span><a href="#"><img src="game.jpg" /></a></span><div id="name">Game (1998)</div></div>
+				<div id="cover"><span><a href="#"><img src="book.png" /></a></span><div id="name">Book</div></div>
+				<div id="cover"><span><a href="#"><img src="book.png" /></a></span><div id="name">Book 2</div></div>-->
+			</div>
+			<div id="shelve-last-shadow"></div> 
+		</div>
+	</div> 
+
+	</body>
+</html>
