@@ -313,6 +313,7 @@ procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 var
   Ini: TIniFile;
 begin
+  BreakScaning:=true;
   if (Main.WindowState <> wsMaximized) then
     if (OldWidth <> Width) or (OldHeight <> Height) then begin
       Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');

@@ -70,6 +70,8 @@ begin
         if FileExists(CurDir + '\cover.gif') then CoverImage:=CurDir + '\cover.gif';
       if CoverImage = '' then
         if FileExists(CurDir + '\cover.jpeg') then CoverImage:=CurDir + '\cover.jpeg';
+      if CoverImage = '' then
+        if FileExists(CurDir + '\cover.hpic') then CoverImage:=CurDir + '\cover.hpic';
 
       WebView.OleObject.Document.getElementById('header').innerHTML:='<h1>' + CurItem + '</h1>';
       WebView.OleObject.Document.getElementById('links').innerHTML:='';
@@ -122,8 +124,18 @@ end;
 function ParseTag(TagName, HTMLSource: string): string;
 begin
   if Pos(TagName, HTMLSource) > 0 then begin
-    Delete(HTMLSource, 1, Pos(TagName, HTMLSource) + Length(TagName) - 1);
-    Result:=Copy(HTMLSource, 1, Pos('</' + Copy(TagName, 2, Length(TagName) - 2), HTMLSource) - 1);
+    Delete(HTMLSource, 1, Pos(TagName, HTMLSource));
+    Delete(HTMLSource, 1, Pos('>', HTMLSource));
+    Result:=Copy(HTMLSource, 1, Pos('</' + TagName, HTMLSource) - 1);
+  end else
+    Result:='';
+end;
+
+function ParseAtribute(AtribName, HTMLSource: string): string;
+begin
+  if Pos(AtribName, HTMLSource) > 0 then begin
+    Delete(HTMLSource, 1, Pos(AtribName + '="', HTMLSource) + Length(AtribName + '="') - 1);
+    Result:=Copy(HTMLSource, 1, Pos('"', HTMLSource) - 1);
   end else
     Result:='';
 end;
@@ -131,9 +143,10 @@ end;
 procedure TDescriptionForm.NFOParse(FileName: string);
 var
   NFOFile: TStringList; Content, Title, OriginalTitle, Description, Year, Country, Studio, Director, Credits, Publisher, Author, Developer, Genre, Premiered, Runtime, Actors: string;
-  Hour, Minutes, FullTime: Integer;
+  Hour, Minutes, FullTime, i: integer;
   NFOType: (MovieNFO, TVShowNFO, GameNFO, BookNFO);
-  CustomButtons: string;
+  CustomButtons, CustomButton, ButtonName, ButtonAtrib: string;
+  ButtonsList: TStringList;
 const
   ItemNameStart = '<div id="item"><div id="title">';
   ItemNameEnd = '</div>';
@@ -157,12 +170,12 @@ begin
     NFOType:=BookNFO;
 
   //Заголовки
-  Title:=ParseTag('<title>', NFOFile.Text);
-  OriginalTitle:=ParseTag('<originaltitle>', NFOFile.Text);
+  Title:=ParseTag('title', NFOFile.Text);
+  OriginalTitle:=ParseTag('originaltitle', NFOFile.Text);
 
   //У сериалов отличается тег второго заголовка
   if NFOType = TVShowNFO then
-    OriginalTitle:=ParseTag('<showtitle>', NFOFile.Text);
+    OriginalTitle:=ParseTag('showtitle', NFOFile.Text);
 
   //Выводим заголовки
   WebView.OleObject.Document.getElementById('header').innerHTML:='<h1>' + Title + '</h1>';
@@ -174,7 +187,7 @@ begin
 
   //Год
   if (NFOType = MovieNFO) or (NFOType = TVShowNFO) then begin
-    Year:=ParseTag('<year>', NFOFile.Text);
+    Year:=ParseTag('year', NFOFile.Text);
     if Year <> '' then
       Content:=Content + ItemNameStart + IDS_YEAR + ItemNameEnd + ValueNameStart + Year + ValueNameEnd;
   end;
@@ -229,13 +242,13 @@ begin
     Content:=Content + ItemNameStart + IDS_GENRE + ItemNameEnd + ValueNameStart + Genre + ValueNameEnd;
 
   //Премьера
-  Premiered:=ParseTag('<premiered>', NFOFile.Text);
+  Premiered:=ParseTag('premiered', NFOFile.Text);
   if Premiered <> '' then
     Content:=Content + ItemNameStart + IDS_PREMIERED + ItemNameEnd + ValueNameStart + Premiered + ValueNameEnd;
 
   if (NFOType = MovieNFO) or (NFOType = TVShowNFO) then begin
     //Время
-    Runtime:=ParseTag('<runtime>', NFOFile.Text);
+    Runtime:=ParseTag('runtime', NFOFile.Text);
     if Runtime <> '' then begin
 
       FullTime:=StrToIntDef(Runtime, 0);
@@ -259,20 +272,31 @@ begin
     WebView.OleObject.Document.getElementById('links').innerHTML:='<a href="#book">' + IDC_OPEN + '</a>';
 
   //Кастомные кнопки
-  if (Pos('<buttons>', NFOFile.Text) > 0) then
-    CustomButtons:=ParseTag('<buttons>', NFOFile.Text);
+  if (Pos('buttons', NFOFile.Text) > 0) then
+    CustomButtons:=ParseTag('buttons', NFOFile.Text);
   if CustomButtons <> '' then begin
-    CustomButtons:=Trim(CustomButtons);
-    CustomButtons:=StringReplace(CustomButtons, 'button open', 'button-open', [rfReplaceAll]);
-    CustomButtons:=StringReplace(CustomButtons, ' ', '%20', [rfReplaceAll]);
-    CustomButtons:=StringReplace(CustomButtons, '<button-open="', '<a href="#open=' + CurDir + '\', [rfReplaceAll]);
-    CustomButtons:=StringReplace(CustomButtons, '</button>', '</a>', [rfReplaceAll]);
-    WebView.OleObject.Document.getElementById('links').innerHTML:=
-    WebView.OleObject.Document.getElementById('links').innerHTML + CustomButtons;
+    ButtonsList:=TStringList.Create;
+    ButtonsList.Text:=Trim(CustomButtons);
+    ButtonsList.Text:=StringReplace(ButtonsList.Text, '<button', #13#10 + '<button', [rfReplaceAll]); //Если пользователь разместил случайно на одной строке
+    for i:=0 to ButtonsList.Count - 1 do
+      if (Pos('<button', ButtonsList.Strings[i]) > 0) or (Pos('</button>', ButtonsList.Strings[i]) > 0) then begin
+
+        ButtonName:=ParseTag('button', ButtonsList.Strings[i]) + '</button>';
+
+        ButtonAtrib:=CurDir + '\' + ParseAtribute('open', ButtonsList.Strings[i]);
+        ButtonAtrib:=StringReplace(ButtonAtrib, ' ', '%20', [rfReplaceAll]); //Пробел не передается по URL
+
+        CustomButton:='<a href="#open=' + ButtonAtrib + '">' + ButtonName + '</a>';
+
+        WebView.OleObject.Document.getElementById('links').innerHTML:=
+        WebView.OleObject.Document.getElementById('links').innerHTML + CustomButton;
+      end;
+
+    ButtonsList.Free;
   end;
 
   //Описание
-  Description:=ParseTag('<plot>', NFOFile.Text);
+  Description:=ParseTag('plot', NFOFile.Text);
   if Description <> '' then
     Content:=Content + '<br>' + Description;
 
@@ -292,7 +316,7 @@ procedure TDescriptionForm.WebViewBeforeNavigate2(Sender: TObject;
   const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
   Headers: OleVariant; var Cancel: WordBool);
 var
-  sUrl, sValue: string;
+  sUrl, sValue, SearchFileExt: string;
   SearchResult: TSearchRec;
 begin
   sUrl:=Copy(URL, Pos('description.html', URL), Length(URL) - Pos('description.html', URL) + 1);
@@ -302,15 +326,16 @@ begin
   if sUrl = 'description.html#movie' then
     if FindFirst(CurDir + '\*.*', faAnyFile, SearchResult) = 0 then begin
       repeat
-        if SearchResult.Attr <> faDirectory then
-          if (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.avi') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.mp4') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.mpeg') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.mkv') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.mov') then begin
+        if SearchResult.Attr <> faDirectory then begin
+
+          SearchFileExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); //Расширение найденного файла
+
+          if (SearchFileExt = '.avi') or (SearchFileExt = '.mp4') or (SearchFileExt = '.mpeg') or
+             (SearchFileExt = '.mkv') or (SearchFileExt = '.mov') then begin
             ShellExecute(Handle, 'open', PChar(CurDir + '\' + SearchResult.Name), nil, nil, SW_SHOW);
             Break;
           end;
+        end;
       until FindNext(SearchResult) <> 0;
       FindClose(SearchResult);
     end;
@@ -319,19 +344,17 @@ begin
   if sUrl = 'description.html#book' then
     if FindFirst(CurDir + '\*.*', faAnyFile, SearchResult) = 0 then begin
       repeat
-        if (SearchResult.Name <> '.') and (SearchResult.Name <> '..') and (SearchResult.Attr <> faDirectory) then
-          if (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.pdf') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.epub') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.txt') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.djvu') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.fb2') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.rtf') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.doc') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.docx') or
-          (AnsiLowerCase(ExtractFileExt(SearchResult.Name)) = '.mobi') then begin
+        if (SearchResult.Name <> '.') and (SearchResult.Name <> '..') and (SearchResult.Attr <> faDirectory) then begin
+
+          SearchFileExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); //Расширение найденного файла
+
+          if (SearchFileExt = '.pdf') or (SearchFileExt = '.epub') or (SearchFileExt = '.txt') or
+             (SearchFileExt = '.djvu') or (SearchFileExt = '.fb2') or (SearchFileExt = '.rtf') or
+             (SearchFileExt = '.doc') or (SearchFileExt = '.docx') or (SearchFileExt = '.mobi') then begin
             ShellExecute(Handle, 'open', PChar(CurDir + '\' + SearchResult.Name), nil, nil, SW_SHOW);
             Break;
           end;
+        end;
       until FindNext(SearchResult) <> 0;
       FindClose(SearchResult);
     end;
@@ -339,7 +362,8 @@ begin
   if Pos('description.html#open=', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#open=', sUrl) + 5);
     sUrl:=StringReplace(sUrl, '%20', ' ', [rfReplaceAll]);
-    ShellExecute(Handle, 'open', PChar(sUrl), nil, nil, SW_SHOW);
+    if FileExists(sUrl) or DirectoryExists(sUrl) then
+      ShellExecute(Handle, 'open', PChar(sUrl), nil, nil, SW_SHOW);
   end;
 
   if sUrl = 'description.html#folder' then
@@ -356,8 +380,8 @@ begin
       case ShowModal of
         mrYes:
           begin
-            CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\movie.nfo'), PChar(CurDir + '\movie.nfo'), true);
-            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\movie.nfo'), nil, SW_SHOW);
+            CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\movie.nfo'), PChar(CurDir + '\' + CurItem + '.nfo'), true);
+            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
           end;
         mrNo:
           begin
@@ -366,13 +390,13 @@ begin
           end;
         mrOK:
           begin
-            CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\game.nfo'), PChar(CurDir + '\game.nfo'), true);
-            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\game.nfo'), nil, SW_SHOW);
+            CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\game.nfo'), PChar(CurDir + '\' + CurItem + '.nfo'), true);
+            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
           end;
         mrCancel:
           begin
-            CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\book.nfo'), PChar(CurDir + '\book.nfo'), true);
-            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\book.nfo'), nil, SW_SHOW);
+            CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\book.nfo'), PChar(CurDir + '\' + CurItem + '.nfo'), true);
+            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
           end;
       end;
     finally
