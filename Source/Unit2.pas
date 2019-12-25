@@ -239,7 +239,7 @@ begin
     if Runtime <> '' then begin
 
       FullTime:=StrToIntDef(Runtime, 0);
-      Content:=Content + ItemNameStart + IDS_RUNTIME + ItemNameEnd + ValueNameStart + Runtime + ' мин. (' + Format('%.2d:%.2d:00', [FullTime div 60, FullTime - (FullTime div 60) * 60]) + ')' + ValueNameEnd;
+      Content:=Content + ItemNameStart + IDS_RUNTIME + ItemNameEnd + ValueNameStart + Runtime + ' ' + IDS_MINUTES + ' (' + Format('%.2d:%.2d:00', [FullTime div 60, FullTime - (FullTime div 60) * 60]) + ')' + ValueNameEnd;
     end;
   end;
 

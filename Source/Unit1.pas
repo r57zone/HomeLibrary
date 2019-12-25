@@ -47,7 +47,7 @@ var
 
   IDS_YEAR, IDS_COUNTRY, IDS_STUDIO, IDS_DIRECTOR, IDS_CREDITS,
   IDS_PUBLISHER, IDS_DEVELOPER, IDS_AUTHOR, IDS_GENRE, IDS_PREMIERED,
-  IDS_RUNTIME: string;
+  IDS_RUNTIME, IDS_MINUTES: string;
 
   IDC_VIEW, IDC_INSTALL, IDC_OPEN, IDC_FOLDER: string;
 
@@ -95,6 +95,7 @@ begin
     IDS_GENRE:='жанр';
     IDS_PREMIERED:='дата выхода';
     IDS_RUNTIME:='время';
+    IDS_MINUTES:='мин.';
     //Кнопки
     IDC_VIEW:='Посмотреть';
     IDC_INSTALL:='Установить';
@@ -121,6 +122,7 @@ begin
     IDS_GENRE:='genre';
     IDS_PREMIERED:='premiered';
     IDS_RUNTIME:='runtime';
+    IDS_MINUTES:='min.';
     //Кнопки
     IDC_VIEW:='View';
     IDC_INSTALL:='Install';
