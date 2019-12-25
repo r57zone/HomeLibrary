@@ -97,7 +97,7 @@ begin
     IDS_RUNTIME:='время';
     IDS_MINUTES:='мин.';
     //Кнопки
-    IDC_VIEW:='Посмотреть';
+    IDC_VIEW:='Просмотр';
     IDC_INSTALL:='Установить';
     IDC_OPEN:='Открыть';
     IDC_FOLDER:='Открыть папку';
