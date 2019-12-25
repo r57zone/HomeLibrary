@@ -1,7 +1,7 @@
 [![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/Home-library/blob/master/README.md) 
 [![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/Home-library/blob/master/README.RU.md)
 # Home library
-Программа позволяющая каталогизировать ваши фильмы, сериалы, игры и книги.
+Каталог ваших фильмов, сериалов, игр и книг.
 
 ## Настройка
 1. Выполните "ie11_enable.reg", чтобы активировать поддержку IE11 для приложения (файл находится в папке с приложением).

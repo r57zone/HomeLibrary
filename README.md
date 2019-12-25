@@ -1,7 +1,7 @@
 [![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/Home-library/blob/master/README.md) 
 [![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/Home-library/blob/master/README.RU.md)
 # Home library
-The program allows to catalog your films, series, games and books.
+Catalog your films, series, games and books.
 
 ## Setup
 1. Run "ie11_enable.reg" to activate IE11 support for the application (the file is located in the application folder).
