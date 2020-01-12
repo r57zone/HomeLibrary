@@ -216,17 +216,18 @@ begin
   end;
 
   if (NFOType = GameNFO) or (NFOType = BookNFO) then begin
-    //Издатель
-    Publisher:=ParseList('<publisher>', '</publisher>', NFOFile.Text);
-    if Publisher <> '' then
-      Content:=Content + ItemNameStart + IDS_PUBLISHER + ItemNameEnd + ValueNameStart + Publisher + ValueNameEnd;
-  end;
 
   if NFOType = GameNFO then begin
     //Разработчик
     Developer:=ParseList('<developer>', '</developer>', NFOFile.Text);
     if Developer <> '' then
 	    Content:=Content + ItemNameStart + IDS_DEVELOPER + ItemNameEnd + ValueNameStart + Developer + ValueNameEnd;
+  end;
+
+    //Издатель
+    Publisher:=ParseList('<publisher>', '</publisher>', NFOFile.Text);
+    if Publisher <> '' then
+      Content:=Content + ItemNameStart + IDS_PUBLISHER + ItemNameEnd + ValueNameStart + Publisher + ValueNameEnd;
   end;
 
   if NFOType = BookNFO then begin
