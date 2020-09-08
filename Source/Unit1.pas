@@ -38,9 +38,13 @@ var
   BreakScaning: boolean;
   ShowHiddenCats: boolean;
   MenuCats, HiddenMenuCats: TStringList;
+
   StyleName, Password: string;
+
   AllowLoadLibrary: boolean = true;
   SwapMouseButtons: boolean;
+
+  ViewerWidth, ViewerHeight, ViewerOldWidth, ViewerOldHeight: integer;
 
   IDS_TITLE, IDS_PASS_QUESTION, IDS_CHOOSE_MEDIA_TYPE: string;
   IDC_MOVIE, IDC_TVSHOW, IDC_GAME, IDC_BOOK, IDC_CANCEL: string;
@@ -147,6 +151,12 @@ begin
   Height:=Ini.ReadInteger('Main', 'Height', Height);
   OldWidth:=Width;
   OldHeight:=Height;
+
+  ViewerWidth:=Ini.ReadInteger('Viewer', 'Width', Width);
+  ViewerHeight:=Ini.ReadInteger('Viewer', 'Height', Height);
+  ViewerOldWidth:=ViewerWidth;
+  ViewerOldHeight:=ViewerHeight;
+
   Ini.Free;
   Application.Title:=Caption;
   WebView.Navigate(ExtractFilePath(ParamStr(0)) + StyleName + 'main.html');
@@ -207,7 +217,10 @@ begin
     sUrl:=StringReplace(sUrl, '%20', ' ', [rfReplaceAll]);
     CurDir:=CurCat + '\' + sURL;
     CurItem:=sUrl;
+    if DescriptionForm.Showing then
+      DescriptionForm.Close;
     DescriptionForm.Show;
+
   end;
 
   if (sUrl = StyleMainFile + '#showHidden') and InputQuery(IDS_TITLE, IDS_PASS_QUESTION, sValue) and (sValue = Password) then begin
@@ -314,6 +327,7 @@ var
   Ini: TIniFile;
 begin
   BreakScaning:=true;
+  
   if (Main.WindowState <> wsMaximized) then
     if (OldWidth <> Width) or (OldHeight <> Height) then begin
       Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
@@ -321,6 +335,14 @@ begin
       Ini.WriteInteger('Main', 'Height', Height);
       Ini.Free;
     end;
+
+  if (ViewerOldWidth <> ViewerWidth) or (ViewerOldHeight <> ViewerHeight) then begin
+    Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+    Ini.WriteInteger('Viewer', 'Width', ViewerWidth);
+    Ini.WriteInteger('Viewer', 'Height', ViewerHeight);
+    Ini.Free;
+  end;
+
   MenuCats.Free;
   HiddenMenuCats.Free;
   Application.OnMessage:=SaveMessageHandler;

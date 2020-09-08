@@ -16,6 +16,7 @@ type
     procedure WebViewBeforeNavigate2(Sender: TObject;
       const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
       Headers: OleVariant; var Cancel: WordBool);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     procedure NFOParse(FileName: string);
     { Private declarations }
@@ -311,6 +312,9 @@ procedure TDescriptionForm.FormShow(Sender: TObject);
 begin
   DescriptionForm.Caption:=IDS_TITLE + ': ' + CurItem;
   WebView.Navigate(ExtractFilePath(ParamStr(0)) + StyleName + 'description.html');
+
+  DescriptionForm.Width:=ViewerWidth;
+  DescriptionForm.Height:=ViewerHeight;
 end;
 
 procedure TDescriptionForm.WebViewBeforeNavigate2(Sender: TObject;
@@ -403,6 +407,15 @@ begin
     finally
       Free;
     end;
+end;
+
+procedure TDescriptionForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  if (DescriptionForm.WindowState <> wsMaximized) then begin
+    ViewerWidth:=DescriptionForm.Width;
+    ViewerHeight:=DescriptionForm.Height;
+  end;
 end;
 
 end.
