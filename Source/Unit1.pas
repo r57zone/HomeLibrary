@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, OleCtrls, SHDocVw, StdCtrls, ShellAPI, MSHTML, IniFiles, ActiveX;
+  Dialogs, OleCtrls, SHDocVw, StdCtrls, ShellAPI, MSHTML, IniFiles, ActiveX,
+  Registry;
 
 type
   TMain = class(TForm)
@@ -76,6 +77,7 @@ end;
 procedure TMain.FormCreate(Sender: TObject);
 var
   Ini: TIniFile;
+  Reg: TRegistry;
 begin
   //Перевод
   if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
@@ -156,6 +158,17 @@ begin
   ViewerHeight:=Ini.ReadInteger('Viewer', 'Height', Height);
   ViewerOldWidth:=ViewerWidth;
   ViewerOldHeight:=ViewerHeight;
+
+  if Ini.ReadBool('Main', 'FirstRun', true) then begin
+    Ini.WriteBool('Main', 'FirstRun', false);
+    Reg:=TRegistry.Create;
+    Reg.RootKey:=HKEY_CURRENT_USER;
+    if Reg.OpenKey('\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION', true) then begin
+        Reg.WriteInteger(ExtractFileName(ParamStr(0)), 11000);
+      Reg.CloseKey;
+    end;
+    Reg.Free;
+  end;
 
   Ini.Free;
   Application.Title:=Caption;
