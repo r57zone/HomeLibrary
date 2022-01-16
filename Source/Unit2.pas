@@ -64,15 +64,11 @@ begin
     if ExtractFileName(StringReplace(URL, '/', '\', [rfReplaceAll])) = 'description.html' then begin
       WebView.Visible:=true;
 
-      if FileExists(CurDir + '\cover.jpg') then CoverImage:=CurDir + '\cover.jpg';
-      if CoverImage = '' then
-        if FileExists(CurDir + '\cover.png') then CoverImage:=CurDir + '\cover.png';
-      if CoverImage = '' then
-        if FileExists(CurDir + '\cover.gif') then CoverImage:=CurDir + '\cover.gif';
-      if CoverImage = '' then
-        if FileExists(CurDir + '\cover.jpeg') then CoverImage:=CurDir + '\cover.jpeg';
-      if CoverImage = '' then
-        if FileExists(CurDir + '\cover.hpic') then CoverImage:=CurDir + '\cover.hpic';
+      if FileExists(CurDir + '\cover.jpg') then CoverImage:=CurDir + '\cover.jpg'
+      else if FileExists(CurDir + '\cover.png') then CoverImage:=CurDir + '\cover.png'
+      else if FileExists(CurDir + '\cover.gif') then CoverImage:=CurDir + '\cover.gif'
+      else if FileExists(CurDir + '\cover.jpeg') then CoverImage:=CurDir + '\cover.jpeg'
+      else if FileExists(CurDir + '\cover.hpic') then CoverImage:=CurDir + '\cover.hpic';
 
       WebView.OleObject.Document.getElementById('header').innerHTML:='<h1>' + CurItem + '</h1>';
       WebView.OleObject.Document.getElementById('links').innerHTML:='';
@@ -80,13 +76,13 @@ begin
       WebView.OleObject.Document.getElementById('description').innerHTML:='<a href="#create">+</a>';
 
       NFOFilePath:='';
-      //Поиск NFO файла
+      // Поиск NFO файла
       if FindFirst(CurDir + '\*.nfo', faAnyFile, SearchResult) = 0 then begin
           NFOFilePath:=CurDir + '\' + SearchResult.Name;
         FindClose(SearchResult);
       end;
 
-      //Кнопка установить для игр (автоопределение)
+      // Кнопка установить для игр (автоопределение)
       if FindFirst(CurDir + '\*.exe', faAnyFile, SearchResult) = 0 then begin
         repeat
           if SearchResult.Attr <> faDirectory then begin
@@ -94,16 +90,16 @@ begin
               WebView.OleObject.Document.getElementById('links').innerHTML:=WebView.OleObject.Document.getElementById('links').innerHTML +
               '<a href="#open=' + StringReplace(CurDir, ' ', '%20', [rfReplaceAll]) + '\' + SearchResult.Name + '">' + IDC_INSTALL + '</a>';
               Break;
-            end;       end;
+            end; end;
         until FindNext(SearchResult) <> 0;
         FindClose(SearchResult);
       end;
 
-      //Парсинг и специальные кнопки
+      // Парсинг и специальные кнопки
       if NFOFilePath <> '' then
         NFOParse(NFOFilePath);
 
-      //Кнопка открыть папку для всех категорий
+      // Кнопка открыть папку для всех категорий
       WebView.OleObject.Document.getElementById('links').innerHTML:=WebView.OleObject.Document.getElementById('links').innerHTML +
       '<a href="#folder">' + IDC_FOLDER + '</a>';
 
@@ -160,7 +156,7 @@ begin
 
   Content:='';
 
-  //Определение типа NFO
+  // Определение типа NFO
   if (Pos('<movie>', NFOFile.Text) > 0) then
     NFOType:=MovieNFO
   else if (Pos('<tvshow>', NFOFile.Text) > 0) then
@@ -170,21 +166,21 @@ begin
   else if (Pos('<book>', NFOFile.Text) > 0) then
     NFOType:=BookNFO;
 
-  //Заголовки
+  // Заголовки
   Title:=ParseTag('title', NFOFile.Text);
   OriginalTitle:=ParseTag('originaltitle', NFOFile.Text);
 
-  //У сериалов отличается тег второго заголовка
+  // У сериалов отличается тег второго заголовка
   if NFOType = TVShowNFO then
     OriginalTitle:=ParseTag('showtitle', NFOFile.Text);
 
-  //Выводим заголовки
+  // Выводим заголовки
   WebView.OleObject.Document.getElementById('header').innerHTML:='<h1>' + Title + '</h1>';
   if (OriginalTitle <> '') and (Title <> OriginalTitle) then
     WebView.OleObject.Document.getElementById('header').innerHTML:=WebView.OleObject.Document.getElementById('header').innerHTML +
     '<h2>' + OriginalTitle + '</h2>';
 
-  //Разбор NFO
+  // Разбор NFO
 
   //Год
   if (NFOType = MovieNFO) or (NFOType = TVShowNFO) then begin
@@ -193,23 +189,23 @@ begin
       Content:=Content + ItemNameStart + IDS_YEAR + ItemNameEnd + ValueNameStart + Year + ValueNameEnd;
   end;
 
-  //Страна
+  // Страна
   Country:=ParseList('<country>', '</country>', NFOFile.Text);
     if Country <> '' then
       Content:=Content + ItemNameStart + IDS_COUNTRY + ItemNameEnd + ValueNameStart + Country + ValueNameEnd;
 
   if (NFOType = MovieNFO) or (NFOType = TVShowNFO) then begin
-    //Студия
+    // Студия
     Studio:=ParseList('<studio>', '</studio>', NFOFile.Text);
     if Director <> '' then
       Content:=Content + ItemNameStart + IDS_STUDIO + ItemNameEnd + ValueNameStart + Studio + ValueNameEnd;
 
-    //Режиссёр
+    // Режиссёр
     Director:=ParseList('<director>', '</director>', NFOFile.Text);
     if Director <> '' then
       Content:=Content + ItemNameStart + IDS_DIRECTOR + ItemNameEnd + ValueNameStart + Director + ValueNameEnd;
 
-    //Сценарист
+    // Сценарист
     Credits:=ParseList('<credits>', '</credits>', NFOFile.Text);
     if Credits <> '' then
       Content:=Content + ItemNameStart + IDS_CREDITS + ItemNameEnd + ValueNameStart + Credits + ValueNameEnd;
@@ -219,37 +215,37 @@ begin
   if (NFOType = GameNFO) or (NFOType = BookNFO) then begin
 
   if NFOType = GameNFO then begin
-    //Разработчик
+    // Разработчик
     Developer:=ParseList('<developer>', '</developer>', NFOFile.Text);
     if Developer <> '' then
 	    Content:=Content + ItemNameStart + IDS_DEVELOPER + ItemNameEnd + ValueNameStart + Developer + ValueNameEnd;
   end;
 
-    //Издатель
+    // Издатель
     Publisher:=ParseList('<publisher>', '</publisher>', NFOFile.Text);
     if Publisher <> '' then
       Content:=Content + ItemNameStart + IDS_PUBLISHER + ItemNameEnd + ValueNameStart + Publisher + ValueNameEnd;
   end;
 
   if NFOType = BookNFO then begin
-    //Автор
+    // Автор
     Author:=ParseList('<author>', '</author>', NFOFile.Text);
     if Publisher <> '' then
       Content:=Content + ItemNameStart + IDS_AUTHOR + ItemNameEnd + ValueNameStart + Author + ValueNameEnd;
   end;
 
-  //Жанры
+  // Жанры
   Genre:=ParseList('<genre>', '</genre>', NFOFile.Text);
   if Genre <> '' then
     Content:=Content + ItemNameStart + IDS_GENRE + ItemNameEnd + ValueNameStart + Genre + ValueNameEnd;
 
-  //Премьера
+  // Премьера
   Premiered:=ParseTag('premiered', NFOFile.Text);
   if Premiered <> '' then
     Content:=Content + ItemNameStart + IDS_PREMIERED + ItemNameEnd + ValueNameStart + Premiered + ValueNameEnd;
 
   if (NFOType = MovieNFO) or (NFOType = TVShowNFO) then begin
-    //Время
+    // Время
     Runtime:=ParseTag('runtime', NFOFile.Text);
     if Runtime <> '' then begin
 
@@ -259,21 +255,21 @@ begin
   end;
 
   {if (NFOType = MovieNFO) or (NFOType = TVShowNFO) then begin
-  //В главных ролях:
+  // В главных ролях:
     Actors:=ParseList('<name>', '</name>', ParseList('<actor>', '</actor>', NFOFile.Text));
     if Actors <> '' then
       Content:=Content + ItemNameStart + 'в главных ролях' + ItemNameEnd + '<div>' + Actors + ValueNameEnd;
   end;}
 
-  //Кнопка для MovieNFO
+  // Кнопка для MovieNFO
   if NFOType = MovieNFO then
     WebView.OleObject.Document.getElementById('links').innerHTML:='<a href="#movie">' + IDC_VIEW + '</a>';
 
-  //Кнопка для BookNFO
+  // Кнопка для BookNFO
   if NFOType = BookNFO then
     WebView.OleObject.Document.getElementById('links').innerHTML:='<a href="#book">' + IDC_OPEN + '</a>';
 
-  //Кастомные кнопки
+  // Кастомные кнопки
   if (Pos('buttons', NFOFile.Text) > 0) then
     CustomButtons:=ParseTag('buttons', NFOFile.Text);
   if CustomButtons <> '' then begin
@@ -297,12 +293,12 @@ begin
     ButtonsList.Free;
   end;
 
-  //Описание
+  // Описание
   Description:=ParseTag('plot', NFOFile.Text);
   if Description <> '' then
     Content:=Content + '<br>' + Description;
 
-  //Вывод
+  // Вывод
   WebView.OleObject.Document.getElementById('description').innerHTML:=Content;
 
   NFOFile.Free;
@@ -333,7 +329,7 @@ begin
       repeat
         if SearchResult.Attr <> faDirectory then begin
 
-          SearchFileExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); //Расширение найденного файла
+          SearchFileExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); // Расширение найденного файла
 
           if (SearchFileExt = '.avi') or (SearchFileExt = '.mp4') or (SearchFileExt = '.mpeg') or
              (SearchFileExt = '.mkv') or (SearchFileExt = '.mov') then begin
@@ -351,7 +347,7 @@ begin
       repeat
         if (SearchResult.Name <> '.') and (SearchResult.Name <> '..') and (SearchResult.Attr <> faDirectory) then begin
 
-          SearchFileExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); //Расширение найденного файла
+          SearchFileExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); // Расширение найденного файла
 
           if (SearchFileExt = '.pdf') or (SearchFileExt = '.epub') or (SearchFileExt = '.txt') or
              (SearchFileExt = '.djvu') or (SearchFileExt = '.fb2') or (SearchFileExt = '.rtf') or

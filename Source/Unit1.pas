@@ -56,12 +56,16 @@ var
 
   IDC_VIEW, IDC_INSTALL, IDC_OPEN, IDC_FOLDER: string;
 
+  IDS_SETTINGS, IDS_PASSWORD, IDS_FOLDERS, IDS_HIDDEN_FOLDERS, IDS_ADD,
+  IDS_REMOVE, IDS_SELECT_FOLDER, IDS_SWAP_MOUSE_BTNS, IDS_CANCEL, ID_LAST_UPDATE: string;
 const
   StyleMainFile = 'main.html';
+  CatsFileName = 'Categories.dat';
+  HiddenCatsFileName = 'HiddenCategories.dat';
 
 implementation
 
-uses Unit2;
+uses Unit2, Unit3;
 
 {$R *.dfm}
 
@@ -79,7 +83,7 @@ var
   Ini: TIniFile;
   Reg: TRegistry;
 begin
-  //Перевод
+  // Перевод
   if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
     IDS_TITLE:='Домашняя библиотека';
     IDS_PASS_QUESTION:='Введите пароль:';
@@ -89,7 +93,7 @@ begin
     IDC_GAME:='Игра';
     IDC_BOOK:='Книга';
     IDC_CANCEL:='Отмена';
-    //Описание
+    // Описание
     IDS_YEAR:='год';
     IDS_COUNTRY:='страна';
     IDS_STUDIO:='студия';
@@ -102,13 +106,24 @@ begin
     IDS_PREMIERED:='дата выхода';
     IDS_RUNTIME:='время';
     IDS_MINUTES:='мин.';
-    //Кнопки
+    // Кнопки
     IDC_VIEW:='Просмотр';
     IDC_INSTALL:='Установить';
     IDC_OPEN:='Открыть';
     IDC_FOLDER:='Открыть папку';
+    // Настройки
+    IDS_SETTINGS:='Настройки';
+    IDS_PASSWORD:='Пароль:';
+    IDS_FOLDERS:='Папки:';
+    IDS_HIDDEN_FOLDERS:='Скрытые папки:';
+    IDS_ADD:='Добавить';
+    IDS_REMOVE:='Удалить';
+    IDS_SELECT_FOLDER:='Выберите папку';
+    IDS_SWAP_MOUSE_BTNS:='Поменять местами функции мыши';
+    IDS_CANCEL:='Отмена';
+    ID_LAST_UPDATE:='Последнее обновление:';
   end else begin
-    IDS_TITLE:='Home library';
+    IDS_TITLE:='Home Library';
     IDS_PASS_QUESTION:='Enter password:';
     IDS_CHOOSE_MEDIA_TYPE:='Choose content type';
     IDC_MOVIE:='Movie';
@@ -134,18 +149,29 @@ begin
     IDC_INSTALL:='Install';
     IDC_OPEN:='Open';
     IDC_FOLDER:='Open folder';
+    // Настройки
+    IDS_SETTINGS:='Settings';
+    IDS_PASSWORD:='Password:';
+    IDS_FOLDERS:='Folders:';
+    IDS_HIDDEN_FOLDERS:='Hidden folders:';
+    IDS_ADD:='Add';
+    IDS_REMOVE:='Remove';
+    IDS_SELECT_FOLDER:='Select folder';
+    IDS_SWAP_MOUSE_BTNS:='Swap mouse button functions';
+    IDS_CANCEL:='Cancel';
+    ID_LAST_UPDATE:='Last update:';
   end;
   Caption:=IDS_TITLE;
   Application.Title:=IDS_TITLE;
 
   MenuCats:=TStringList.Create;
-  if FileExists(ExtractFilePath(ParamStr(0)) + 'Categories.txt') then
-    MenuCats.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'Categories.txt');
+  if FileExists(ExtractFilePath(ParamStr(0)) + CatsFileName) then
+    MenuCats.LoadFromFile(ExtractFilePath(ParamStr(0)) + CatsFileName);
   HiddenMenuCats:=TStringList.Create;
-  if FileExists(ExtractFilePath(ParamStr(0)) + 'HiddenCategories.txt') then
-    HiddenMenuCats.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'HiddenCategories.txt');
+  if FileExists(ExtractFilePath(ParamStr(0)) + HiddenCatsFileName) then
+    HiddenMenuCats.LoadFromFile(ExtractFilePath(ParamStr(0)) + HiddenCatsFileName);
     
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.dat');
   StyleName:='Styles\' + Ini.ReadString('Main', 'Style', 'Cupboard') + '\';
   SwapMouseButtons:=Ini.ReadBool('Main', 'SwapMouseButtons', false);
   Password:=Ini.ReadString('Main', 'Password', '');
@@ -182,17 +208,17 @@ begin
   WebView.OleObject.Document.getElementById('menu').innerHTML:='';
   for i:=0 to MenuCats.Count - 1 do
     WebView.OleObject.Document.getElementById('menu').innerHTML:=WebView.OleObject.Document.getElementById('menu').innerHTML +
-    '<a href="#view=' + StringReplace(MenuCats.Strings[i], ' ', '%20', [rfReplaceAll]) + //Заменяем пробелы на "%20", чтобы передать их в пути
+    '<a href="#view=' + StringReplace(MenuCats.Strings[i], ' ', '%20', [rfReplaceAll]) + // Заменяем пробелы на "%20", чтобы передать их в пути
     '">' + ExtractFileName(MenuCats.Strings[i]) + '</a>';
 
-  //Если пароль введен показываем скрытые категории
+  // Если пароль введен показываем скрытые категории
   if ShowHiddenCats then begin
     for i:=0 to HiddenMenuCats.Count - 1 do
       WebView.OleObject.Document.getElementById('menu').innerHTML:=WebView.OleObject.Document.getElementById('menu').innerHTML +
-      '<a href="#view=' + StringReplace(HiddenMenuCats.Strings[i], ' ', '%20', [rfReplaceAll]) + //Заменяем пробелы на "%20", чтобы передать их в пути
+      '<a href="#view=' + StringReplace(HiddenMenuCats.Strings[i], ' ', '%20', [rfReplaceAll]) + // Заменяем пробелы на "%20", чтобы передать их в пути
       '">' + ExtractFileName(HiddenMenuCats.Strings[i]) + '</a>';
   end else
-  //Показываем значок скрытых категорий
+  // Показываем значок скрытых категорий
     if Trim(HiddenMenuCats.Text) <> '' then
       WebView.OleObject.Document.getElementById('menu').innerHTML:=WebView.OleObject.Document.getElementById('menu').innerHTML +
       '<a href="#showHidden">...</a>';
@@ -211,8 +237,8 @@ begin
   if Pos(StyleMainFile + '#view=', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#view=', sUrl) + 5);
     CurCat:=sUrl;
-    CurCat:=StringReplace(CurCat, '%20', ' ', [rfReplaceAll]); //Возвращаем пробелы назад (пробелы в пути URL)
-    //При изменении категории останавливать поиск
+    CurCat:=StringReplace(CurCat, '%20', ' ', [rfReplaceAll]); // Возвращаем пробелы назад (пробелы в пути URL)
+    // При изменении категории останавливать поиск
     BreakScaning:=true;
 
     LoadLibrary;
@@ -240,6 +266,11 @@ begin
     ShowHiddenCats:=true;
     UpdateMenu;
   end;
+
+  if (sUrl = StyleMainFile + '#settings') then
+    if (Password = '') then SettingsForm.ShowModal
+      else if InputQuery(IDS_TITLE, IDS_PASS_QUESTION, sValue) and (sValue = Password) then
+        SettingsForm.ShowModal;
 end;
 
 procedure TMain.WebViewDocumentComplete(Sender: TObject;
@@ -262,26 +293,17 @@ var
 begin
   CoverImage:='';
 
-  if FileExists(CurCat + '\' + ItemName + '\cover-small.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpg';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover-small.png') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.png';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover-small.gif') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.gif';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover-small.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpeg';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover-small.hpic') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.hpic';
+  if FileExists(CurCat + '\' + ItemName + '\cover-small.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpg'
+  else if FileExists(CurCat + '\' + ItemName + '\cover-small.png') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.png'
+  else if FileExists(CurCat + '\' + ItemName + '\cover-small.gif') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.gif'
+  else if FileExists(CurCat + '\' + ItemName + '\cover-small.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpeg'
+  else if FileExists(CurCat + '\' + ItemName + '\cover-small.hpic') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.hpic'
 
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover.jpg';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover.png') then CoverImage:=CurCat + '\' + ItemName + '\cover.png';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover.gif') then CoverImage:=CurCat + '\' + ItemName + '\cover.gif';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\cover.jpeg';
-  if CoverImage = '' then
-    if FileExists(CurCat + '\' + ItemName + '\cover.hpic') then CoverImage:=CurCat + '\' + ItemName + '\cover.hpic';
+  else if FileExists(CurCat + '\' + ItemName + '\cover.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover.jpg'
+  else if FileExists(CurCat + '\' + ItemName + '\cover.png') then CoverImage:=CurCat + '\' + ItemName + '\cover.png'
+  else if FileExists(CurCat + '\' + ItemName + '\cover.gif') then CoverImage:=CurCat + '\' + ItemName + '\cover.gif'
+  else if FileExists(CurCat + '\' + ItemName + '\cover.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\cover.jpeg'
+  else if FileExists(CurCat + '\' + ItemName + '\cover.hpic') then CoverImage:=CurCat + '\' + ItemName + '\cover.hpic';
 
   if CoverImage = '' then
     CoverImage:='default.png';
@@ -302,12 +324,12 @@ procedure TMain.ScanItems;
 var
   SearchResult: TSearchRec;
 begin
-  //Очистка списка
+  // Очистка списка
   WebView.OleObject.Document.getElementById('items').innerHTML:='';
 
   if FindFirst(CurCat + '\*.*', faAnyFile, SearchResult) = 0 then begin
       repeat
-        if BreakScaning then //При изменении категории останавливать поиск
+        if BreakScaning then // При изменении категории останавливать поиск
           Break;
         if (SearchResult.Name <> '.') and (SearchResult.Name <> '..') and (SearchResult.Attr = faDirectory) then begin
           AddItem(SearchResult.Name);
@@ -325,13 +347,13 @@ begin
 
   if AllowLoadLibrary = false then Exit;
   AllowLoadLibrary:=false;
-  //Снова разрешаем поиск
+  // Снова разрешаем поиск
   BreakScaning:=false;
 
   Caption:=IDS_TITLE + ': ' + ExtractFileName(CurCat);
   Application.Title:=Caption;
 
-  //Ищем
+  // Ищем
   ScanItems;
 end;
 
@@ -343,14 +365,14 @@ begin
   
   if (Main.WindowState <> wsMaximized) then
     if (OldWidth <> Width) or (OldHeight <> Height) then begin
-      Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+      Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.dat');
       Ini.WriteInteger('Main', 'Width', Width);
       Ini.WriteInteger('Main', 'Height', Height);
       Ini.Free;
     end;
 
   if (ViewerOldWidth <> ViewerWidth) or (ViewerOldHeight <> ViewerHeight) then begin
-    Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+    Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.dat');
     Ini.WriteInteger('Viewer', 'Width', ViewerWidth);
     Ini.WriteInteger('Viewer', 'Height', ViewerHeight);
     Ini.Free;

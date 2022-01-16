@@ -14,14 +14,17 @@ body{
 	background-color:#cd9a59;
 }
 
+#clear{clear:both;float:none;height:0;}
+
 #cover
 {
 	display:inline-block;
 	height:189px;
 	width:140px;
 	margin:0 10px;
-	vertical-align: bottom;
+	vertical-align:bottom;
 	padding-bottom:47px;
+	overflow:hidden;
 }
 
 #cover span{
@@ -32,12 +35,14 @@ body{
 
 #cover img
 {
+	display:inline-block;
 	margin-left:20px;
 	cursor:pointer;
 	width:100px;
-	box-shadow: 0px 0px 25px 4px rgba(0,0,0,0.50);
-	outline: 1px solid #303030;
-	background-color:#3c3c3c;
+	box-shadow:0px 0px 25px 4px rgba(0,0,0,0.50);
+	border:1px solid rgba(0,0,0,0.05);
+	border-style:inset;
+	background-color:black;
 }
 
 #cover img:hover
@@ -129,14 +134,28 @@ body{
 #search-input
 {
 	color:#323232;
-	margin:9px 10px 0 0;
+	margin:9px 4px 0 0;
+	padding:5px 8px 4px 8px;
 	background:transparent;
 	background-image:url(images/input.png);
 	border:1px solid #8d6833;
 	border-top:1px solid #574224;
 	border-radius:5px;
-	padding:5px 8px 4px 8px;
 }
+
+#settings{
+	float:right;
+	cursor:pointer;
+	text-decoration:none;
+	margin:9px 10px 0 0;
+	padding:2px 4px 1px 4px;
+	background-image:url(images/input.png);
+	border-radius:5px;
+	border:1px solid #8d6833;
+	border-top:1px solid #574224;
+	color:white;
+}
+#settings:hover{background-color:#ba8342;}
 </style>
 <script type="text/javascript">
 	function search()
@@ -163,12 +182,19 @@ body{
 <body oncontextmenu="return false;" onselectstart="return false;">
 	<div id="header">
 		<div id="menu">
+			<a href="#"></a>
 			<!--<a href="#">Фильмы</a> <a href="#">Сериалы</a> <a href="#">Игры</a>-->
 		</div>
+		<a href="#settings">
+			<div id="settings">
+				<img src="images/settings.png" />
+			</div>
+		</a>
 		<div id="search">
 			<input id="search-input" onkeyup="search();" value="" type="text" placeholder="Search..." />
 		</div>
 	</div>
+	
 	<div id="cupboard">
 		<div id="shelves-edges">
 			<div id="items">
