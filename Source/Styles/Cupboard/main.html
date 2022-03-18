@@ -173,10 +173,10 @@ body{
 		}
 	}
 
-  document.addEventListener('DOMContentLoaded', function(){
+	document.addEventListener('DOMContentLoaded', function(){
 	if (navigator.language.toLowerCase() == 'ru-ru')
 		document.getElementById('search-input').setAttribute('placeholder', 'Поиск...');
-  });
+	});
 </script>
 </head>
 <body oncontextmenu="return false;" onselectstart="return false;">
@@ -191,7 +191,7 @@ body{
 			</div>
 		</a>
 		<div id="search">
-			<input id="search-input" onkeyup="search();" value="" type="text" placeholder="Search..." />
+			<input id="search-input" onkeypress="search();" value="" type="text" placeholder="Search..." />
 		</div>
 	</div>
 	
