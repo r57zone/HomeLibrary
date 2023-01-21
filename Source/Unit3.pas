@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ShlObj, IniFiles;
+  Dialogs, StdCtrls, ShlObj, IniFiles, Menus;
 
 type
   TSettingsForm = class(TForm)
@@ -22,6 +22,12 @@ type
     CancelBtn: TButton;
     Button5: TButton;
     SwapMouseFuncCB: TCheckBox;
+    PopupMenuFolder: TPopupMenu;
+    MoveFolderUpBtn: TMenuItem;
+    MoveFolderDownBtn: TMenuItem;
+    PopupMenuFolder2: TPopupMenu;
+    MoveFolderUpBtn2: TMenuItem;
+    MoveFolderDownBtn2: TMenuItem;
     procedure Button5Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure CancelBtnClick(Sender: TObject);
@@ -30,9 +36,15 @@ type
     procedure OkBtnClick(Sender: TObject);
     procedure AddHdnPathBtnClick(Sender: TObject);
     procedure RemHdnPathBtnClick(Sender: TObject);
+    procedure MoveFolderUpBtnClick(Sender: TObject);
+    procedure MoveFolderDownBtnClick(Sender: TObject);
+    procedure MoveFolderUpBtn2Click(Sender: TObject);
+    procedure MoveFolderDownBtn2Click(Sender: TObject);
   private
     { Private declarations }
   public
+    procedure SaveFolders;
+    procedure SaveHiddenFolders;
     { Public declarations }
   end;
 
@@ -69,8 +81,8 @@ end;
 
 procedure TSettingsForm.Button5Click(Sender: TObject);
 begin
-  Application.MessageBox(PChar(IDS_TITLE + ' 0.4' + #13#10 +
-  ID_LAST_UPDATE + ' 16.01.22' + #13#10 +
+  Application.MessageBox(PChar(IDS_TITLE + ' 0.4.1' + #13#10 +
+  ID_LAST_UPDATE + ' 17.01.23' + #13#10 +
   'https://r57zone.github.io' + #13#10 +
   'r57zone@gmail.com'), PChar(IDS_TITLE), MB_ICONINFORMATION);
 end;
@@ -87,7 +99,10 @@ begin
   PasswordLbl.Caption:=IDS_PASSWORD;
   SwapMouseFuncCB.Caption:=IDS_SWAP_MOUSE_BTNS;
   CancelBtn.Caption:=IDS_CANCEL;
-
+  MoveFolderUpBtn.Caption:=IDS_MOVE_UP;
+  MoveFolderDownBtn.Caption:=IDS_MOVE_DOWN;
+  MoveFolderUpBtn2.Caption:=IDS_MOVE_UP;
+  MoveFolderDownBtn2.Caption:=IDS_MOVE_DOWN;
   PasswordEdt.Text:=Password;
   PathsLB.Items.Text:=MenuCats.Text;
   HiddenPathsLB.Items.Text:=HiddenMenuCats.Text;
@@ -105,9 +120,8 @@ var
 begin
   TempPath:=BrowseFolderDialog(PChar(IDS_SELECT_FOLDER));
   if TempPath <> '' then begin
-    MenuCats.Add(TempPath);
-    PathsLB.Items.Text:=MenuCats.Text;
-    MenuCats.SaveToFile(ExtractFilePath(ParamStr(0)) + CatsFileName);
+    PathsLB.Items.Add(TempPath);
+    SaveFolders;
   end;
 end;
 
@@ -115,8 +129,7 @@ procedure TSettingsForm.RemBtnClick(Sender: TObject);
 begin
   if PathsLB.ItemIndex = -1 then Exit;
   PathsLB.DeleteSelected;
-  MenuCats.Text:=PathsLB.Items.Text;
-  MenuCats.SaveToFile(ExtractFilePath(ParamStr(0)) + CatsFileName);
+  SaveFolders;
 end;
 
 procedure TSettingsForm.OkBtnClick(Sender: TObject);
@@ -137,9 +150,8 @@ var
 begin
   TempPath:=BrowseFolderDialog(PChar(IDS_SELECT_FOLDER));
   if TempPath <> '' then begin
-    HiddenMenuCats.Add(TempPath);
-    HiddenPathsLB.Items.Text:=HiddenMenuCats.Text;
-    HiddenMenuCats.SaveToFile(ExtractFilePath(ParamStr(0)) + HiddenCatsFileName);
+    HiddenPathsLB.Items.Add(TempPath);
+    SaveHiddenFolders;
   end;
 end;
 
@@ -147,6 +159,65 @@ procedure TSettingsForm.RemHdnPathBtnClick(Sender: TObject);
 begin
   if HiddenPathsLB.ItemIndex = -1 then Exit;
   HiddenPathsLB.DeleteSelected;
+  SaveHiddenFolders;
+end;
+
+procedure TSettingsForm.MoveFolderUpBtnClick(Sender: TObject);
+var
+  TempFolderPath: string;
+begin
+  if (PathsLB.ItemIndex = -1) or (PathsLB.ItemIndex = 0) then Exit;
+  TempFolderPath:=PathsLB.Items.Strings[PathsLB.ItemIndex];
+  PathsLB.Items.Strings[PathsLB.ItemIndex]:=PathsLB.Items.Strings[PathsLB.ItemIndex - 1];
+  PathsLB.Items.Strings[PathsLB.ItemIndex - 1]:=TempFolderPath;
+  PathsLB.ItemIndex:=PathsLB.ItemIndex - 1;
+  SaveFolders;
+end;
+
+procedure TSettingsForm.MoveFolderDownBtnClick(Sender: TObject);
+var
+  TempFolderPath: string;
+begin
+  if (PathsLB.ItemIndex = -1) or (PathsLB.ItemIndex = PathsLB.Count - 1) then Exit;
+  TempFolderPath:=PathsLB.Items.Strings[PathsLB.ItemIndex];
+  PathsLB.Items.Strings[PathsLB.ItemIndex]:=PathsLB.Items.Strings[PathsLB.ItemIndex + 1];
+  PathsLB.Items.Strings[PathsLB.ItemIndex + 1]:=TempFolderPath;
+  PathsLB.ItemIndex:=PathsLB.ItemIndex + 1;
+  SaveFolders;
+end;
+
+procedure TSettingsForm.MoveFolderUpBtn2Click(Sender: TObject);
+var
+  TempFolderPath: string;
+begin
+  if (HiddenPathsLB.ItemIndex = -1) or (HiddenPathsLB.ItemIndex = 0) then Exit;
+  TempFolderPath:=HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex];
+  HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex]:=HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex - 1];
+  HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex - 1]:=TempFolderPath;
+  HiddenPathsLB.ItemIndex:=HiddenPathsLB.ItemIndex - 1;
+  SaveHiddenFolders;
+end;
+
+procedure TSettingsForm.MoveFolderDownBtn2Click(Sender: TObject);
+var
+  TempFolderPath: string;
+begin
+  if (HiddenPathsLB.ItemIndex = -1) or (HiddenPathsLB.ItemIndex = HiddenPathsLB.Count - 1) then Exit;
+  TempFolderPath:=HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex];
+  HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex]:=HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex + 1];
+  HiddenPathsLB.Items.Strings[HiddenPathsLB.ItemIndex + 1]:=TempFolderPath;
+  HiddenPathsLB.ItemIndex:=HiddenPathsLB.ItemIndex + 1;
+  SaveHiddenFolders;
+end;
+
+procedure TSettingsForm.SaveFolders;
+begin
+  MenuCats.Text:=PathsLB.Items.Text;
+  MenuCats.SaveToFile(ExtractFilePath(ParamStr(0)) + CatsFileName);
+end;
+
+procedure TSettingsForm.SaveHiddenFolders;
+begin
   HiddenMenuCats.Text:=HiddenPathsLB.Items.Text;
   HiddenMenuCats.SaveToFile(ExtractFilePath(ParamStr(0)) + HiddenCatsFileName);
 end;

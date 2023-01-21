@@ -44,6 +44,7 @@ object SettingsForm: TSettingsForm
     Width = 361
     Height = 113
     ItemHeight = 13
+    PopupMenu = PopupMenuFolder
     TabOrder = 0
   end
   object AddPathBtn: TButton
@@ -70,6 +71,7 @@ object SettingsForm: TSettingsForm
     Width = 361
     Height = 113
     ItemHeight = 13
+    PopupMenu = PopupMenuFolder2
     TabOrder = 3
   end
   object AddHdnPathBtn: TButton
@@ -132,5 +134,29 @@ object SettingsForm: TSettingsForm
     Height = 17
     Caption = #1055#1086#1084#1077#1085#1103#1090#1100' '#1084#1077#1089#1090#1072#1084#1080' '#1092#1091#1085#1082#1094#1080#1080' '#1084#1099#1096#1080
     TabOrder = 10
+  end
+  object PopupMenuFolder: TPopupMenu
+    Left = 376
+    Top = 88
+    object MoveFolderUpBtn: TMenuItem
+      Caption = #1055#1077#1088#1077#1084#1077#1089#1090#1080#1090#1100' '#1074#1099#1096#1077
+      OnClick = MoveFolderUpBtnClick
+    end
+    object MoveFolderDownBtn: TMenuItem
+      Caption = #1055#1077#1088#1077#1084#1077#1089#1090#1080#1090#1100' '#1085#1080#1078#1077
+      OnClick = MoveFolderDownBtnClick
+    end
+  end
+  object PopupMenuFolder2: TPopupMenu
+    Left = 376
+    Top = 224
+    object MoveFolderUpBtn2: TMenuItem
+      Caption = #1055#1077#1088#1077#1084#1077#1089#1090#1080#1090#1100' '#1074#1099#1096#1077
+      OnClick = MoveFolderUpBtn2Click
+    end
+    object MoveFolderDownBtn2: TMenuItem
+      Caption = #1055#1077#1088#1077#1084#1077#1089#1090#1080#1090#1100' '#1085#1080#1078#1077
+      OnClick = MoveFolderDownBtn2Click
+    end
   end
 end

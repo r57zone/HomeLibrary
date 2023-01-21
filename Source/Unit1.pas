@@ -58,6 +58,7 @@ var
 
   IDS_SETTINGS, IDS_PASSWORD, IDS_FOLDERS, IDS_HIDDEN_FOLDERS, IDS_ADD,
   IDS_REMOVE, IDS_SELECT_FOLDER, IDS_SWAP_MOUSE_BTNS, IDS_CANCEL, ID_LAST_UPDATE: string;
+  IDS_MOVE_UP, IDS_MOVE_DOWN: string;
 const
   StyleMainFile = 'main.html';
   CatsFileName = 'Categories.dat';
@@ -122,6 +123,9 @@ begin
     IDS_SWAP_MOUSE_BTNS:='Поменять местами функции мыши';
     IDS_CANCEL:='Отмена';
     ID_LAST_UPDATE:='Последнее обновление:';
+    // Меню
+    IDS_MOVE_UP:='Переместить выше';
+    IDS_MOVE_DOWN:='Переместить ниже';
   end else begin
     IDS_TITLE:='Home Library';
     IDS_PASS_QUESTION:='Enter password:';
@@ -160,6 +164,9 @@ begin
     IDS_SWAP_MOUSE_BTNS:='Swap mouse button functions';
     IDS_CANCEL:='Cancel';
     ID_LAST_UPDATE:='Last update:';
+    // Меню
+    IDS_MOVE_UP:='Move up';
+    IDS_MOVE_DOWN:='Move down';
   end;
   Caption:=IDS_TITLE;
   Application.Title:=IDS_TITLE;
