@@ -4,7 +4,7 @@ object SettingsForm: TSettingsForm
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-  ClientHeight = 360
+  ClientHeight = 418
   ClientWidth = 460
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -102,7 +102,7 @@ object SettingsForm: TSettingsForm
   end
   object OkBtn: TButton
     Left = 8
-    Top = 328
+    Top = 384
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -111,7 +111,7 @@ object SettingsForm: TSettingsForm
   end
   object CancelBtn: TButton
     Left = 88
-    Top = 328
+    Top = 384
     Width = 75
     Height = 25
     Caption = #1054#1090#1084#1077#1085#1072
@@ -120,7 +120,7 @@ object SettingsForm: TSettingsForm
   end
   object Button5: TButton
     Left = 428
-    Top = 328
+    Top = 384
     Width = 25
     Height = 25
     Caption = '?'
@@ -128,12 +128,20 @@ object SettingsForm: TSettingsForm
     OnClick = Button5Click
   end
   object SwapMouseFuncCB: TCheckBox
-    Left = 184
-    Top = 298
+    Left = 8
+    Top = 354
     Width = 225
     Height = 17
     Caption = #1055#1086#1084#1077#1085#1103#1090#1100' '#1084#1077#1089#1090#1072#1084#1080' '#1092#1091#1085#1082#1094#1080#1080' '#1084#1099#1096#1080
     TabOrder = 10
+  end
+  object AdditionalBtnsCB: TCheckBox
+    Left = 8
+    Top = 328
+    Width = 185
+    Height = 17
+    Caption = #1044#1086#1087#1086#1083#1085#1080#1090#1077#1083#1100#1085#1099#1077' '#1082#1085#1086#1087#1082#1080
+    TabOrder = 11
   end
   object PopupMenuFolder: TPopupMenu
     Left = 376

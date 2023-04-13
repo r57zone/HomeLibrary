@@ -43,6 +43,7 @@ var
   StyleName, Password: string;
 
   AllowLoadLibrary: boolean = true;
+  ShowAdditionalButtons: boolean;
   SwapMouseButtons: boolean;
 
   ViewerWidth, ViewerHeight, ViewerOldWidth, ViewerOldHeight: integer;
@@ -54,15 +55,13 @@ var
   IDS_PUBLISHER, IDS_DEVELOPER, IDS_AUTHOR, IDS_GENRE, IDS_PREMIERED,
   IDS_RUNTIME, IDS_MINUTES: string;
 
-  IDC_VIEW, IDC_INSTALL, IDC_OPEN, IDC_FOLDER: string;
+  IDC_VIEW, IDC_INSTALL, IDC_OPEN, IDC_FOLDER, IDC_MOUNT, IDC_RUN: string;
 
   IDS_SETTINGS, IDS_PASSWORD, IDS_FOLDERS, IDS_HIDDEN_FOLDERS, IDS_ADD,
-  IDS_REMOVE, IDS_SELECT_FOLDER, IDS_SWAP_MOUSE_BTNS, IDS_CANCEL, ID_LAST_UPDATE: string;
+  IDS_REMOVE, IDS_SELECT_FOLDER, IDS_ADV_BTNS, IDS_SWAP_MOUSE_BTNS, IDS_CANCEL, ID_LAST_UPDATE: string;
   IDS_MOVE_UP, IDS_MOVE_DOWN: string;
 const
   StyleMainFile = 'main.html';
-  CatsFileName = 'Categories.dat';
-  HiddenCatsFileName = 'HiddenCategories.dat';
 
 implementation
 
@@ -95,23 +94,25 @@ begin
     IDC_BOOK:='Книга';
     IDC_CANCEL:='Отмена';
     // Описание
-    IDS_YEAR:='год';
-    IDS_COUNTRY:='страна';
-    IDS_STUDIO:='студия';
-    IDS_DIRECTOR:='режиссёр';
-    IDS_CREDITS:='сценарий';
-    IDS_PUBLISHER:='издатель';
-    IDS_DEVELOPER:='разработчик';
-    IDS_AUTHOR:='автор';
-    IDS_GENRE:='жанр';
-    IDS_PREMIERED:='дата выхода';
-    IDS_RUNTIME:='время';
+    IDS_YEAR:='Год';
+    IDS_COUNTRY:='Страна';
+    IDS_STUDIO:='Студия';
+    IDS_DIRECTOR:='Режиссёр';
+    IDS_CREDITS:='Сценарий';
+    IDS_PUBLISHER:='Издатель';
+    IDS_DEVELOPER:='Разработчик';
+    IDS_AUTHOR:='Автор';
+    IDS_GENRE:='Жанр';
+    IDS_PREMIERED:='Дата выхода';
+    IDS_RUNTIME:='Время';
     IDS_MINUTES:='мин.';
     // Кнопки
     IDC_VIEW:='Просмотр';
     IDC_INSTALL:='Установить';
     IDC_OPEN:='Открыть';
     IDC_FOLDER:='Открыть папку';
+    IDC_MOUNT:='Смонтировать';
+    IDC_RUN:='Запустить';
     // Настройки
     IDS_SETTINGS:='Настройки';
     IDS_PASSWORD:='Пароль:';
@@ -120,6 +121,7 @@ begin
     IDS_ADD:='Добавить';
     IDS_REMOVE:='Удалить';
     IDS_SELECT_FOLDER:='Выберите папку';
+    IDS_ADV_BTNS:='Дополнительные кнопки';
     IDS_SWAP_MOUSE_BTNS:='Поменять местами функции мыши';
     IDS_CANCEL:='Отмена';
     ID_LAST_UPDATE:='Последнее обновление:';
@@ -136,23 +138,25 @@ begin
     IDC_BOOK:='Book';
     IDC_CANCEL:='Cancel';
     //Описание
-    IDS_YEAR:='year';
-    IDS_COUNTRY:='country';
-    IDS_STUDIO:='studio';
-    IDS_DIRECTOR:='director';
-    IDS_CREDITS:='credits';
-    IDS_PUBLISHER:='publisher';
-    IDS_DEVELOPER:='developer';
-    IDS_AUTHOR:='author';
-    IDS_GENRE:='genre';
-    IDS_PREMIERED:='premiered';
-    IDS_RUNTIME:='runtime';
+    IDS_YEAR:='Year';
+    IDS_COUNTRY:='Country';
+    IDS_STUDIO:='Studio';
+    IDS_DIRECTOR:='Director';
+    IDS_CREDITS:='Credits';
+    IDS_PUBLISHER:='Publisher';
+    IDS_DEVELOPER:='Developer';
+    IDS_AUTHOR:='Author';
+    IDS_GENRE:='Genre';
+    IDS_PREMIERED:='Premiered';
+    IDS_RUNTIME:='Runtime';
     IDS_MINUTES:='min.';
     //Кнопки
     IDC_VIEW:='View';
     IDC_INSTALL:='Install';
     IDC_OPEN:='Open';
     IDC_FOLDER:='Open folder';
+    IDC_MOUNT:='Mount';
+    IDC_RUN:='Run';
     // Настройки
     IDS_SETTINGS:='Settings';
     IDS_PASSWORD:='Password:';
@@ -161,6 +165,7 @@ begin
     IDS_ADD:='Add';
     IDS_REMOVE:='Remove';
     IDS_SELECT_FOLDER:='Select folder';
+    IDS_ADV_BTNS:='Additional buttons';
     IDS_SWAP_MOUSE_BTNS:='Swap mouse button functions';
     IDS_CANCEL:='Cancel';
     ID_LAST_UPDATE:='Last update:';
@@ -171,15 +176,16 @@ begin
   Caption:=IDS_TITLE;
   Application.Title:=IDS_TITLE;
 
-  MenuCats:=TStringList.Create;
-  if FileExists(ExtractFilePath(ParamStr(0)) + CatsFileName) then
-    MenuCats.LoadFromFile(ExtractFilePath(ParamStr(0)) + CatsFileName);
-  HiddenMenuCats:=TStringList.Create;
-  if FileExists(ExtractFilePath(ParamStr(0)) + HiddenCatsFileName) then
-    HiddenMenuCats.LoadFromFile(ExtractFilePath(ParamStr(0)) + HiddenCatsFileName);
-    
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.dat');
+
+  MenuCats:=TStringList.Create;
+  MenuCats.Text:=Trim(StringReplace(Ini.ReadString('Main', 'CatFolders', ''), ';', #13#10, [rfReplaceAll]));
+
+  HiddenMenuCats:=TStringList.Create;
+  HiddenMenuCats.Text:=Trim(StringReplace(Ini.ReadString('Main', 'CatHiddenFolders', ''), ';', #13#10, [rfReplaceAll]));
+
   StyleName:='Styles\' + Ini.ReadString('Main', 'Style', 'Cupboard') + '\';
+  ShowAdditionalButtons:=Ini.ReadBool('Main', 'AdditionalButtons', true);
   SwapMouseButtons:=Ini.ReadBool('Main', 'SwapMouseButtons', false);
   Password:=Ini.ReadString('Main', 'Password', '');
   Width:=Ini.ReadInteger('Main', 'Width', Width);
@@ -300,7 +306,13 @@ var
 begin
   CoverImage:='';
 
-  if FileExists(CurCat + '\' + ItemName + '\cover-small.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpg'
+  if FileExists(CurCat + '\' + ItemName + '\coversmall.jpg') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.jpg'
+  else if FileExists(CurCat + '\' + ItemName + '\coversmall.png') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.png'
+  else if FileExists(CurCat + '\' + ItemName + '\coversmall.gif') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.gif'
+  else if FileExists(CurCat + '\' + ItemName + '\coversmall.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.jpeg'
+  else if FileExists(CurCat + '\' + ItemName + '\coversmall.hpic') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.hpic'
+
+  else if FileExists(CurCat + '\' + ItemName + '\cover-small.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpg'
   else if FileExists(CurCat + '\' + ItemName + '\cover-small.png') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.png'
   else if FileExists(CurCat + '\' + ItemName + '\cover-small.gif') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.gif'
   else if FileExists(CurCat + '\' + ItemName + '\cover-small.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpeg'

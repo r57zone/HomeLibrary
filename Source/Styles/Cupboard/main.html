@@ -160,13 +160,13 @@ body{
 <script type="text/javascript">
 	function search()
 	{
-		var query = document.getElementById('search-input').value.toLowerCase();
-		var items = document.getElementById('items').children;
+		let query = document.getElementById('search-input').value.toLowerCase().trim();
+		let items = document.getElementById('items').children;
 		for(i = 0; i < items.length; i++)
 		{
-			var itemName = items[i].children[1].innerHTML.toLowerCase();
+			let itemName = items[i].children[1].innerHTML.toLowerCase();
 			
-			if (itemName.indexOf(query) != -1)
+			if (query == '' || itemName.indexOf(query) != -1)
 				items[i].style.display = 'inline-block';
 			else
 				items[i].style.display = 'none';
