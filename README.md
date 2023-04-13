@@ -12,7 +12,7 @@ Catalog for movies, tv shows, games and books.
 5. Optionally, you can exchange the functionality of the right and left mouse buttons.
 
 ## Features
-By default, `ISO`, `CUE`, `EXE` files and folders are automatically added to the description. You can disable this in the settings.
+By default, `ISO`, `CUE`, `EXE` files and folders are automatically added to the description. You can disable this in the settings. To automount `ISO` and `CUE` images, you can install the [WinCDEmu program](https://wincdemu.sysprogs.org/).
 
 
 To rename automatically added buttons, you need to create a button yourself, for example - `<button open="setup_dlc.exe">DLC</button>".
