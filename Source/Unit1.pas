@@ -84,7 +84,7 @@ var
   Reg: TRegistry;
 begin
   // Перевод
-  if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian2' then begin
+  if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
     IDS_TITLE:='Домашняя библиотека';
     IDS_PASS_QUESTION:='Введите пароль:';
     IDS_CHOOSE_MEDIA_TYPE:='Выберите тип контента';
