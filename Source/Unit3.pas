@@ -81,7 +81,7 @@ end;
 procedure TSettingsForm.Button5Click(Sender: TObject);
 begin
   Application.MessageBox(PChar(IDS_TITLE + ' 0.5' + #13#10 +
-  ID_LAST_UPDATE + ' 07.04.23' + #13#10 +
+  ID_LAST_UPDATE + ' 13.04.23' + #13#10 +
   'https://r57zone.github.io' + #13#10 +
   'r57zone@gmail.com'), PChar(IDS_TITLE), MB_ICONINFORMATION);
 end;
