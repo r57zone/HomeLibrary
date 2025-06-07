@@ -350,7 +350,7 @@ begin
       repeat
         if BreakScaning then // ѕри изменении категории останавливать поиск
           Break;
-        if (SearchResult.Name <> '.') and (SearchResult.Name <> '..') and (SearchResult.Attr = faDirectory) then begin
+        if (SearchResult.Name <> '.') and (SearchResult.Name <> '..') and ((SearchResult.Attr and faDirectory) <> 0) then begin
           AddItem(SearchResult.Name);
           Application.ProcessMessages;
         end;
