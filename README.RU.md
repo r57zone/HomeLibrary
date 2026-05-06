@@ -32,6 +32,7 @@
 <a href="https://user-images.githubusercontent.com/9499881/71445983-2a53ac80-2738-11ea-81f5-e8b8a6d4858b.png">
 <img src="https://user-images.githubusercontent.com/9499881/71445983-2a53ac80-2738-11ea-81f5-e8b8a6d4858b.png" height="150px" />
 </a>
+
 ## Загрузка
 >Поддерживается Windows 7, 8, 8.1, 10, 11.
 
