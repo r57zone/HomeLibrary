@@ -56,12 +56,78 @@ begin
   end;
 end;}
 
+function IsAllowedExt(const FileName, ExtList: string): Boolean;
+var
+  Ext: string;
+begin
+  Ext := AnsiLowerCase(ExtractFileExt(FileName));
+  Result := Pos(';' + Ext + ';', ';' + AnsiLowerCase(ExtList) + ';') > 0;
+end;
+
+function BuildFileLinks(const Dir, ExtList, ButtonTitle, SearchInName, ExcludeSearch: string): string;
+var
+  SearchResult: TSearchRec;
+  Files: TStringList;
+  i: Integer;
+  FileName, Html, FileNameLowerCase: string;
+begin
+  Files := TStringList.Create;
+  try
+    if FindFirst(Dir + '\*.*', faAnyFile, SearchResult) = 0 then begin
+      repeat
+        if (SearchResult.Attr and faDirectory) = 0 then begin
+          FileName:=SearchResult.Name;
+          FileNameLowerCase:=AnsiLowerCase(FileName);
+
+          if IsAllowedExt(FileName, ExtList) then
+            if SearchInName = '' then begin
+              if ExcludeSearch = '' then
+                Files.Add(FileName)
+              else if Pos(ExcludeSearch, FileNameLowerCase) = 0 then
+                Files.Add(FileName);
+
+            end else if Pos(SearchInName, FileNameLowerCase) > 0 then
+              Files.Add(FileName);
+        end;
+      until FindNext(SearchResult) <> 0;
+
+      FindClose(SearchResult);
+    end;
+
+    Html:='';
+
+    if Files.Count = 1 then begin
+      FileName := Files[0];
+
+      Html:=Html +
+        '<a href="#open=' + Main.URLEncode(FileName) +
+        '" title="' + FileName + '">' +
+        ButtonTitle + '</a><br>';
+    end
+
+    else if Files.Count > 1 then begin
+      for i := 0 to Files.Count - 1 do begin
+        FileName := Files[i];
+
+        Html:=Html +
+          '<a href="#open=' + Main.URLEncode(FileName) +
+          '" title="' + FileName + '">' +
+          ButtonTitle + ' (' + FileName + ')</a><br>';
+      end;
+    end;
+
+    Result := Html;
+
+  finally
+    Files.Free;
+  end;
+end;
+
 procedure TDescriptionForm.WebViewDocumentComplete(Sender: TObject;
   const pDisp: IDispatch; var URL: OleVariant);
 var
   CoverImage: string;
   SearchResult: TSearchRec;
-  FileNameExt, SetupExeName: string;
   ButtonsPaths: string;
 begin
   if pDisp=(Sender as TWebBrowser).Application then
@@ -78,13 +144,7 @@ begin
       else if FileExists(CurDir + '\coversmall.png') then CoverImage:=CurDir + '\coversmall.png'
       else if FileExists(CurDir + '\coversmall.gif') then CoverImage:=CurDir + '\coversmall.gif'
       else if FileExists(CurDir + '\coversmall.jpeg') then CoverImage:=CurDir + '\coversmall.jpeg'
-      else if FileExists(CurDir + '\coversmall.hpic') then CoverImage:=CurDir + '\coversmall.hpic'
-
-      else if FileExists(CurDir + '\cover-small.jpg') then CoverImage:=CurDir + '\cover-small.jpg'
-      else if FileExists(CurDir + '\cover-small.png') then CoverImage:=CurDir + '\cover-small.png'
-      else if FileExists(CurDir + '\cover-small.gif') then CoverImage:=CurDir + '\cover-small.gif'
-      else if FileExists(CurDir + '\cover-small.jpeg') then CoverImage:=CurDir + '\cover-small.jpeg'
-      else if FileExists(CurDir + '\cover-small.hpic') then CoverImage:=CurDir + '\cover-small.hpic';
+      else if FileExists(CurDir + '\coversmall.hpic') then CoverImage:=CurDir + '\coversmall.hpic';
 
       WebView.OleObject.Document.getElementById('header').innerHTML:='<h1>' + CurItem + '</h1>';
       WebView.OleObject.Document.getElementById('links').innerHTML:='';
@@ -100,61 +160,40 @@ begin
       end;
 
       // Кнопка установить для игр (автоопределение)
-      SetupExeName:='';
-      if FindFirst(CurDir + '\*.exe', faAnyFile, SearchResult) = 0 then begin
-        repeat
-          if SearchResult.Attr = faDirectory then Continue;
-          if Pos('setup', AnsiLowerCase(SearchResult.Name)) = 0 then Continue;
-          WebView.OleObject.Document.getElementById('links').innerHTML:=WebView.OleObject.Document.getElementById('links').innerHTML +
-          '<a href="#open=' + StringReplace(CurDir, ' ', '%20', [rfReplaceAll]) + '\' + SearchResult.Name + '">' + IDC_INSTALL + '</a>';
-          SetupExeName:=SearchResult.Name;
-          Break;
-        until FindNext(SearchResult) <> 0;
-        FindClose(SearchResult);
-      end;
+      WebView.OleObject.Document.getElementById('links').innerHTML:=
+      WebView.OleObject.Document.getElementById('links').innerHTML + BuildFileLinks(CurDir, '.exe;.msi', IDC_INSTALL, 'setup', '');
 
       // Парсинг и специальные кнопки
       if NFOFilePath <> '' then begin
         NFOParse(NFOFilePath);
         WebView.OleObject.Document.getElementById('description').innerHTML:=WebView.OleObject.Document.getElementById('description').innerHTML + '<a id="editBtn" href="#editNFO">&#9998;</a></div>';
+      end else begin
+        WebView.OleObject.Document.getElementById('links').innerHTML:=
+        WebView.OleObject.Document.getElementById('links').innerHTML + BuildFileLinks(CurDir, '.mp4;.avi;.mkv;.mov', IDC_VIEW, '', '');
+
+        WebView.OleObject.Document.getElementById('links').innerHTML:=
+        WebView.OleObject.Document.getElementById('links').innerHTML + BuildFileLinks(CurDir, '.pdf;.djvu;.html;.txt;.epub;.fb2;.rtf;.doc;.docx;.mobi', IDC_VIEW, '', '');
       end;
 
       if ShowAdditionalButtons then begin
-      // CD images
-      if FindFirst(CurDir + '\*.*', faAnyFile, SearchResult) = 0 then begin
-        repeat
-          if SearchResult.Attr = faDirectory then Continue;
-          FileNameExt:=ExtractFileExt(AnsiLowerCase(SearchResult.Name));
-          if (FileNameExt = '.iso') or (FileNameExt = '.cue') then begin
+        // CD images
+        WebView.OleObject.Document.getElementById('links').innerHTML:=
+        WebView.OleObject.Document.getElementById('links').innerHTML + BuildFileLinks(CurDir, '.iso;.cue;.mds;.nrg;.ccd', IDC_MOUNT, '', '');
+
+        // Патчи и прочее
+        WebView.OleObject.Document.getElementById('links').innerHTML:=
+        WebView.OleObject.Document.getElementById('links').innerHTML + BuildFileLinks(CurDir, '.exe;.msi', IDC_RUN, '', 'setup');
+
+        // Folders
+        if FindFirst(CurDir + '\*.*', faAnyFile, SearchResult) = 0 then begin
+          repeat
+            if (ButtonsPaths <> '') and (Pos(SearchResult.Name + #13#10, ButtonsPaths) > 0) then Continue;
+            if (SearchResult.Name = '.') or (SearchResult.Name = '..') or ((SearchResult.Attr and faDirectory) = 0) then Continue;
             WebView.OleObject.Document.getElementById('links').innerHTML:=WebView.OleObject.Document.getElementById('links').innerHTML +
-            '<a href="#open=' + StringReplace(CurDir, ' ', '%20', [rfReplaceAll]) + '\' + SearchResult.Name + '" title="' + SearchResult.Name + '">' + IDC_MOUNT + ' ' + SearchResult.Name + '</a>';
-          end;
-        until FindNext(SearchResult) <> 0;
-        FindClose(SearchResult);
-      end;
-
-      // Патчи и прочее
-      if FindFirst(CurDir + '\*.exe', faAnyFile, SearchResult) = 0 then begin
-        repeat
-          if (ButtonsPaths <> '') and (Pos(SearchResult.Name + #13#10, ButtonsPaths) > 0) then Continue;
-          if SearchResult.Attr = faDirectory then Continue;
-          if (SetupExeName <> '') and (SetupExeName = SearchResult.Name) then Continue;
-          WebView.OleObject.Document.getElementById('links').innerHTML:=WebView.OleObject.Document.getElementById('links').innerHTML +
-          '<a href="#open=' + StringReplace(CurDir, ' ', '%20', [rfReplaceAll]) + '\' + SearchResult.Name + '" title="' + SearchResult.Name + '">' + IDC_RUN + ' ' + SearchResult.Name + '</a>';
-        until FindNext(SearchResult) <> 0;
-        FindClose(SearchResult);
-      end;
-
-      // Folders
-      if FindFirst(CurDir + '\*.*', faAnyFile, SearchResult) = 0 then begin
-        repeat
-          if (ButtonsPaths <> '') and (Pos(SearchResult.Name + #13#10, ButtonsPaths) > 0) then Continue;
-          if (SearchResult.Attr <> faDirectory) or (SearchResult.Name = '.') or (SearchResult.Name = '..') then Continue;
-          WebView.OleObject.Document.getElementById('links').innerHTML:=WebView.OleObject.Document.getElementById('links').innerHTML +
-          '<a href="#open=' + StringReplace(CurDir, ' ', '%20', [rfReplaceAll]) + '\' + SearchResult.Name + '" title="' + SearchResult.Name + '">' + SearchResult.Name + '</a>';
-        until FindNext(SearchResult) <> 0;
-        FindClose(SearchResult);
-      end;
+            '<a href="#open=' + Main.URLEncode(SearchResult.Name) + '" title="' + SearchResult.Name + '">' + SearchResult.Name + '</a>';
+          until FindNext(SearchResult) <> 0;
+          FindClose(SearchResult);
+        end;
 
       end; // ShowAdditionalButtons
 
@@ -198,7 +237,10 @@ end;
 
 procedure TDescriptionForm.NFOParse(FileName: string);
 var
-  NFOFile: TStringList; Content, Title, OriginalTitle, Description, Year, Country, Studio, Director, Credits, Publisher, Author, Developer, Genre, Premiered, Runtime, Actors: string;
+  NFOFile: TStringList; Content, Title, OriginalTitle, Description, Year,
+  Country, Studio, Director, Credits, Publisher, Author, Developer, Genre,
+  Premiered, Runtime, Actors: string;
+  FileNameExt: string;
   Hour, Minutes, FullTime, i: integer;
   NFOType: (MovieNFO, TVShowNFO, GameNFO, BookNFO);
   CustomButtons, CustomButton, ButtonName, ButtonAtrib: string;
@@ -250,8 +292,8 @@ begin
 
   // Страна
   Country:=ParseList('<country>', '</country>', NFOFile.Text);
-    if Country <> '' then
-      Content:=Content + ItemNameStart + IDS_COUNTRY + ItemNameEnd + ValueNameStart + Country + ValueNameEnd;
+  if Country <> '' then
+    Content:=Content + ItemNameStart + IDS_COUNTRY + ItemNameEnd + ValueNameStart + Country + ValueNameEnd;
 
   if (NFOType = MovieNFO) or (NFOType = TVShowNFO) then begin
     // Студия
@@ -321,12 +363,18 @@ begin
   end;}
 
   // Кнопка для MovieNFO
-  if NFOType = MovieNFO then
-    WebView.OleObject.Document.getElementById('links').innerHTML:='<a href="#movie">' + IDC_VIEW + '</a>';
+  if NFOType = MovieNFO then begin
+    //WebView.OleObject.Document.getElementById('links').innerHTML:='<a href="#movie">' + IDC_VIEW + '</a>';
+    WebView.OleObject.Document.getElementById('links').innerHTML:=
+    WebView.OleObject.Document.getElementById('links').innerHTML + BuildFileLinks(CurDir, '.mp4;.avi;.mkv;.mov', IDC_VIEW, '', '');
+  end;
 
   // Кнопка для BookNFO
-  if NFOType = BookNFO then
-    WebView.OleObject.Document.getElementById('links').innerHTML:='<a href="#book">' + IDC_OPEN + '</a>';
+  if NFOType = BookNFO then begin
+    //WebView.OleObject.Document.getElementById('links').innerHTML:='<a href="#book">' + IDC_OPEN + '</a>';
+    WebView.OleObject.Document.getElementById('links').innerHTML:=
+    WebView.OleObject.Document.getElementById('links').innerHTML + BuildFileLinks(CurDir, '.pdf;.djvu;.html;.txt;.epub;.fb2;.rtf;.doc;.docx;.mobi', IDC_VIEW, '', '');
+  end;
 
   // Кастомные кнопки
   if (Pos('buttons', NFOFile.Text) > 0) then
@@ -334,7 +382,7 @@ begin
   if CustomButtons <> '' then begin
     ButtonsList:=TStringList.Create;
     ButtonsList.Text:=Trim(CustomButtons);
-    ButtonsList.Text:=StringReplace(ButtonsList.Text, '<button', #13#10 + '<button', [rfReplaceAll]); //Если пользователь разместил случайно на одной строке
+    ButtonsList.Text:=StringReplace(ButtonsList.Text, '<button', #13#10 + '<button', [rfReplaceAll]); // Если пользователь разместил случайно на одной строке
     for i:=0 to ButtonsList.Count - 1 do
       if (Pos('<button', ButtonsList.Strings[i]) > 0) or (Pos('</button>', ButtonsList.Strings[i]) > 0) then begin
 
@@ -342,7 +390,7 @@ begin
         if Trim(AnsiLowerCase(ButtonName)) = 'hidden' then Continue;
 
         ButtonAtrib:=CurDir + '\' + ParseAtribute('open', ButtonsList.Strings[i]);
-        ButtonAtrib:=StringReplace(ButtonAtrib, ' ', '%20', [rfReplaceAll]); //Пробел не передается по URL
+        ButtonAtrib:=Main.URLEncode(ButtonAtrib);
 
         CustomButton:='<a href="#open=' + ButtonAtrib + '">' + ButtonName + '</a>';
 
@@ -416,45 +464,9 @@ begin
 
   if Pos('description.html', sUrl) = 0 then Cancel:=true;
 
-  if sUrl = 'description.html#movie' then
-    if FindFirst(CurDir + '\*.*', faAnyFile, SearchResult) = 0 then begin
-      repeat
-        if SearchResult.Attr <> faDirectory then begin
-
-          FileNameExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); // Расширение найденного файла
-
-          if (FileNameExt = '.avi') or (FileNameExt = '.mp4') or (FileNameExt = '.mpeg') or
-             (FileNameExt = '.mkv') or (FileNameExt = '.mov') then begin
-            ShellExecute(Handle, 'open', PChar(CurDir + '\' + SearchResult.Name), nil, nil, SW_SHOW);
-            Break;
-          end;
-        end;
-      until FindNext(SearchResult) <> 0;
-      FindClose(SearchResult);
-    end;
-
-
-  if sUrl = 'description.html#book' then
-    if FindFirst(CurDir + '\*.*', faAnyFile, SearchResult) = 0 then begin
-      repeat
-        if (SearchResult.Name <> '.') and (SearchResult.Name <> '..') and (SearchResult.Attr <> faDirectory) then begin
-
-          FileNameExt:=AnsiLowerCase(ExtractFileExt(SearchResult.Name)); // Расширение найденного файла
-
-          if (FileNameExt = '.pdf') or (FileNameExt = '.epub') or (FileNameExt = '.txt') or
-             (FileNameExt = '.djvu') or (FileNameExt = '.fb2') or (FileNameExt = '.rtf') or
-             (FileNameExt = '.doc') or (FileNameExt = '.docx') or (FileNameExt = '.mobi') then begin
-            ShellExecute(Handle, 'open', PChar(CurDir + '\' + SearchResult.Name), nil, nil, SW_SHOW);
-            Break;
-          end;
-        end;
-      until FindNext(SearchResult) <> 0;
-      FindClose(SearchResult);
-    end;
-
   if Pos('description.html#open=', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#open=', sUrl) + 5);
-    sUrl:=StringReplace(sUrl, '%20', ' ', [rfReplaceAll]);
+    sUrl:=CurDir + '\' + Main.URLDecode(sUrl);
     if FileExists(sUrl) or DirectoryExists(sUrl) then
       ShellExecute(Handle, 'open', PChar(sUrl), nil, nil, SW_SHOW);
   end;
@@ -474,22 +486,22 @@ begin
         mrYes:
           begin
             CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\movie.nfo'), PChar(CurDir + '\' + CurItem + '.nfo'), true);
-            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
+            ShellExecute(Handle, 'open', 'notepad.exe', PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
           end;
         mrNo:
           begin
             CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\tvshow.nfo'), PChar(CurDir + '\tvshow.nfo'), true);
-            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\tvshow.nfo'), nil, SW_SHOW);
+            ShellExecute(Handle, 'open', 'notepad.exe', PChar(CurDir + '\tvshow.nfo'), nil, SW_SHOW);
           end;
         mrOK:
           begin
             CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\game.nfo'), PChar(CurDir + '\' + CurItem + '.nfo'), true);
-            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
+            ShellExecute(Handle, 'open', 'notepad.exe', PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
           end;
         mrCancel:
           begin
             CopyFile(PChar(ExtractFilePath(ParamStr(0)) + 'nfo\book.nfo'), PChar(CurDir + '\' + CurItem + '.nfo'), true);
-            ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
+            ShellExecute(Handle, 'open', 'notepad.exe', PChar(CurDir + '\' + CurItem + '.nfo'), nil, SW_SHOW);
           end;
       end;
     finally
@@ -497,7 +509,7 @@ begin
     end;
 
   if sUrl = 'description.html#editNFO' then
-    ShellExecute(Handle, 'open', PChar(GetEnvironmentVariable('systemroot')  + '\system32\notepad.exe'), PChar(NFOFilePath), nil, SW_SHOW);
+    ShellExecute(Handle, 'open', 'notepad.exe', PChar(NFOFilePath), nil, SW_SHOW);
 end;
 
 procedure TDescriptionForm.FormClose(Sender: TObject;

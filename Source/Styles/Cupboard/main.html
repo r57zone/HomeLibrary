@@ -56,7 +56,7 @@ body{
 	margin-top:6px;
 	padding:1px 3px;
 	font-size:10px;
-	width:calc(100% - 6);
+	width:calc(100% - 6px);
 	height:12px;
 	color:#422209;
 	border-radius:3px;
@@ -113,7 +113,12 @@ body{
 	box-shadow: 0px 6px 26px -4px rgba(0,0,0,0.61);
 }
 
-#menu{float:left;}
+#menu{
+	float:left;
+	white-space:nowrap;
+	overflow:hidden;
+	max-width:calc(100% - 220px);
+}
 #menu a
 {
 	display:inline-block;
@@ -129,6 +134,34 @@ body{
 }
 #menu a:first-child{margin-left:12px;}
 #menu a:hover{background-color:#97672d;}
+
+#menu-fade-left
+{
+    position:absolute;
+    top:0;
+    left:0;
+    width:40px;
+    height:44px;
+    pointer-events:none;
+    background:url(images/menu-fade-left.png) repeat-y;
+    z-index:5;
+    opacity:0;
+    transition: opacity 0.2s ease;
+}
+
+#menu-fade-right
+{
+    position:absolute;
+    top:0;
+    right:204px;
+	width:40px;
+	height:44px;
+	margin-left:-32px;
+	pointer-events:none;
+	background:url(images/menu-fade-right.png) repeat-y;
+	transition: opacity 0.2s ease;
+	z-index:5;
+}
 
 #search{float:right;}
 #search-input
@@ -172,26 +205,54 @@ body{
 				items[i].style.display = 'none';
 		}
 	}
+	
+	document.addEventListener('DOMContentLoaded', function() {
+		const menu = document.getElementById('menu');
+		const menuFadeLeft = document.getElementById('menu-fade-left');
+		const menuFadeRight = document.getElementById('menu-fade-right');
+		
+		function updateFade() {
+			const atStart = menu.scrollLeft === 0;
+			const atEnd = menu.scrollLeft + menu.clientWidth >= menu.scrollWidth - 1;
 
-	document.addEventListener('DOMContentLoaded', function(){
-	if (navigator.language.toLowerCase() == 'ru-ru')
-		document.getElementById('search-input').setAttribute('placeholder', 'Поиск...');
+			// левый fade
+			if (atStart)
+				menuFadeLeft.style.opacity = 0;
+			else
+				menuFadeLeft.style.opacity = 1;
+
+			// правый fade
+			if (atEnd)
+				menuFadeRight.style.opacity = 0;
+			else
+				menuFadeRight.style.opacity = 1;
+		}
+
+		document.getElementById('menu').addEventListener('wheel', function(e) {
+			this.scrollLeft += e.deltaY;
+			e.preventDefault();
+			updateFade();
+		});
+		if (navigator.language.toLowerCase() == 'ru-ru')
+			document.getElementById('search-input').setAttribute('placeholder', 'Поиск...');
 	});
 </script>
 </head>
 <body oncontextmenu="return false;" onselectstart="return false;">
 	<div id="header">
+		<div id="menu-fade-left"></div>
 		<div id="menu">
 			<a href="#"></a>
 			<!--<a href="#">Фильмы</a> <a href="#">Сериалы</a> <a href="#">Игры</a>-->
 		</div>
+		<div id="menu-fade-right"></div>
 		<a href="#settings">
 			<div id="settings">
 				<img src="images/settings.png" />
 			</div>
 		</a>
 		<div id="search">
-			<input id="search-input" onkeypress="search();" value="" type="text" placeholder="Search..." />
+			<input id="search-input" oninput="search();" value="" type="text" placeholder="Search..." />
 		</div>
 	</div>
 	

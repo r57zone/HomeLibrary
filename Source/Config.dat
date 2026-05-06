@@ -2,6 +2,10 @@
 Skin=Cupboard
 Password=
 SwapMouseButtons=0
+UseCoverTemplates=0
+AdditionalButtons=1
+CatFolders=
+CatHiddenFolders=
 
 [Viewer]
 Width=800

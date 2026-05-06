@@ -24,6 +24,8 @@ type
     procedure AddItem(ItemName: string);
     { Private declarations }
   public
+    function URLEncode(const S: string): string;
+    function URLDecode(const S: string): string;
     procedure LoadLibrary;
     procedure ScanItems;
     procedure UpdateMenu;
@@ -44,7 +46,7 @@ var
 
   AllowLoadLibrary: boolean = true;
   ShowAdditionalButtons: boolean;
-  SwapMouseButtons: boolean;
+  SwapMouseButtons, UseCoverTemplates: boolean;
 
   ViewerWidth, ViewerHeight, ViewerOldWidth, ViewerOldHeight: integer;
 
@@ -60,6 +62,8 @@ var
   IDS_SETTINGS, IDS_PASSWORD, IDS_FOLDERS, IDS_HIDDEN_FOLDERS, IDS_ADD,
   IDS_REMOVE, IDS_SELECT_FOLDER, IDS_ADV_BTNS, IDS_SWAP_MOUSE_BTNS, IDS_CANCEL, ID_LAST_UPDATE: string;
   IDS_MOVE_UP, IDS_MOVE_DOWN: string;
+
+  IDS_COVERS, IDS_CREATE_COVERS, IDS_ONLY_MISSING, IDS_RECREATE_ALL, IDS_DONE, IDS_USE_COVER_TEMPLATES: string;
 const
   StyleMainFile = 'main.html';
 
@@ -69,13 +73,138 @@ uses Unit2, Unit3;
 
 {$R *.dfm}
 
-function GetLocaleInformation(Flag: integer): string;
+{function GetUserDefaultUILanguage: LANGID; stdcall; external 'kernel32.dll';
+
+function GetUserLocaleCode: string;
 var
-  pcLCA: array [0..20] of Char;
+  Lang, Country: array[0..15] of Char;
+  MyLCID: LCID;
 begin
-  if GetLocaleInfo(LOCALE_SYSTEM_DEFAULT, Flag, pcLCA, 19) <= 0 then
+  MyLCID:=GetUserDefaultLCID;
+
+  if GetLocaleInfo(MyLCID, LOCALE_SISO639LANGNAME, Lang, SizeOf(Lang)) = 0 then
+    Lang[0]:=#0;
+
+  if GetLocaleInfo(MyLCID, LOCALE_SISO3166CTRYNAME, Country, SizeOf(Country)) = 0 then
+    Country[0]:=#0;
+
+  Result:=string(Lang);
+
+  if Country[0] <> #0 then
+    Result:=Result + '-' + string(Country);
+end;
+
+function GetLocaleInformation(Flag: integer): string; // If there are multiple languages in the system (with sorting) / Если в системе несколько языков (с сортировкой)
+var
+  pcLCA: array [0..63] of Char;
+begin
+  if GetLocaleInfo((DWORD(SORT_DEFAULT) shl 16) or Word(GetUserDefaultUILanguage), Flag, pcLCA, Length(pcLCA)) <= 0 then
     pcLCA[0]:=#0;
   Result:=pcLCA;
+end;}
+
+function GetLocaleInformation(Flag: integer): string;
+var
+  pcLCA: array [0..63] of Char;
+begin
+  if GetLocaleInfo(LOCALE_SYSTEM_DEFAULT, Flag, pcLCA, Length(pcLCA)) <= 0 then
+    pcLCA[0]:=#0;
+  Result:=pcLCA;
+end;
+
+function DigitToHex(Digit: Integer): Char;
+  begin
+    case Digit of
+      0..9: Result := Chr(Digit + Ord('0'));
+      10..15: Result := Chr(Digit - 10 + Ord('A'));
+    else
+      Result := '0';
+  end;
+end; // DigitToHex
+
+function TMain.URLEncode(const S: string): string;
+var
+  i, idx, len: Integer;
+begin
+  len := 0;
+  for i := 1 to Length(S) do
+    if ((S[i] >= '0') and (S[i] <= '9')) or
+      ((S[i] >= 'A') and (S[i] <= 'Z')) or
+      ((S[i] >= 'a') and (S[i] <= 'z')) or (S[i] = ' ') or
+      (S[i] = '_') or (S[i] = '*') or (S[i] = '-') or (S[i] = '.') then
+      len := len + 1
+    else
+      len := len + 3;
+  SetLength(Result, len);
+  idx := 1;
+  for i := 1 to Length(S) do
+    if S[i] = ' ' then begin
+      Result[idx] := '+';
+      idx := idx + 1;
+    end else
+      if ((S[i] >= '0') and (S[i] <= '9')) or
+        ((S[i] >= 'A') and (S[i] <= 'Z')) or
+        ((S[i] >= 'a') and (S[i] <= 'z')) or
+        (S[i] = '_') or (S[i] = '*') or (S[i] = '-') or (S[i] = '.') then begin
+          Result[idx] := S[i];
+          idx := idx + 1;
+        end
+        else
+        begin
+          Result[idx] := '%';
+          Result[idx + 1] := DigitToHex(Ord(S[i]) div 16);
+          Result[idx + 2] := DigitToHex(Ord(S[i]) mod 16);
+          idx := idx + 3;
+        end;
+end;
+
+function TMain.URLDecode(const S: string): string;
+var
+  i, idx, len, n_coded: Integer;
+  function WebHexToInt(HexChar: Char): Integer;
+    begin
+      if HexChar < '0' then
+        Result := Ord(HexChar) + 256 - Ord('0')
+      else if HexChar <= Chr(Ord('A') - 1) then
+        Result := Ord(HexChar) - Ord('0')
+      else if HexChar <= Chr(Ord('a') - 1) then
+        Result := Ord(HexChar) - Ord('A') + 10
+      else
+        Result := Ord(HexChar) - Ord('a') + 10;
+      end;
+begin
+  len := 0;
+  n_coded := 0;
+  for i := 1 to Length(S) do
+    if n_coded >= 1 then begin
+      n_coded := n_coded + 1;
+        if n_coded >= 3 then
+          n_coded := 0;
+    end else begin
+      len := len + 1;
+      if S[i] = '%' then
+        n_coded := 1;
+    end;
+  SetLength(Result, len);
+  idx := 0;
+  n_coded := 0;
+  for i := 1 to Length(S) do
+    if n_coded >= 1 then begin
+      n_coded := n_coded + 1;
+      if n_coded >= 3 then begin
+        Result[idx] := Chr((WebHexToInt(S[i - 1]) * 16 +
+        WebHexToInt(S[i])) mod 256);
+        n_coded := 0;
+      end;
+    end else begin
+      idx := idx + 1;
+      if S[i] = '%' then
+        n_coded := 1;
+      if S[i] = '+' then
+        Result[idx] := ' '
+      else
+        Result[idx] := S[i];
+    end;
 end;
 
 procedure TMain.FormCreate(Sender: TObject);
@@ -128,6 +257,13 @@ begin
     // Меню
     IDS_MOVE_UP:='Переместить выше';
     IDS_MOVE_DOWN:='Переместить ниже';
+
+    IDS_COVERS:='Обложки';
+    IDS_CREATE_COVERS:='Создать обложки для выбранной папки:';
+    IDS_ONLY_MISSING:='Только отсутствующие';
+    IDS_RECREATE_ALL:='Пересоздать все';
+    IDS_DONE:='Готово';
+    IDS_USE_COVER_TEMPLATES:='Использовать шаблоны для обложек';
   end else begin
     IDS_TITLE:='Home Library';
     IDS_PASS_QUESTION:='Enter password:';
@@ -172,6 +308,13 @@ begin
     // Меню
     IDS_MOVE_UP:='Move up';
     IDS_MOVE_DOWN:='Move down';
+
+    IDS_COVERS:='Covers';
+    IDS_CREATE_COVERS:='Create covers for selected folder:';
+    IDS_ONLY_MISSING:='Only missing';
+    IDS_RECREATE_ALL:='Recreate all';
+    IDS_DONE:='Done';
+    IDS_USE_COVER_TEMPLATES:='Use templates for covers';
   end;
   Caption:=IDS_TITLE;
   Application.Title:=IDS_TITLE;
@@ -187,6 +330,7 @@ begin
   StyleName:='Styles\' + Ini.ReadString('Main', 'Style', 'Cupboard') + '\';
   ShowAdditionalButtons:=Ini.ReadBool('Main', 'AdditionalButtons', true);
   SwapMouseButtons:=Ini.ReadBool('Main', 'SwapMouseButtons', false);
+  UseCoverTemplates:=Ini.ReadBool('Main', 'UseCoverTemplates', false);
   Password:=Ini.ReadString('Main', 'Password', '');
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
@@ -202,8 +346,16 @@ begin
     Ini.WriteBool('Main', 'FirstRun', false);
     Reg:=TRegistry.Create;
     Reg.RootKey:=HKEY_CURRENT_USER;
+
+    // Режим эмуляции IE11
     if Reg.OpenKey('\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION', true) then begin
         Reg.WriteInteger(ExtractFileName(ParamStr(0)), 11000);
+      Reg.CloseKey;
+    end;
+
+    // Аппаратное ускорение GPU
+    if Reg.OpenKey('\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_GPU_RENDERING', true) then begin
+      Reg.WriteInteger(ExtractFileName(ParamStr(0)), 1);
       Reg.CloseKey;
     end;
     Reg.Free;
@@ -221,14 +373,14 @@ begin
   WebView.OleObject.Document.getElementById('menu').innerHTML:='';
   for i:=0 to MenuCats.Count - 1 do
     WebView.OleObject.Document.getElementById('menu').innerHTML:=WebView.OleObject.Document.getElementById('menu').innerHTML +
-    '<a href="#view=' + StringReplace(MenuCats.Strings[i], ' ', '%20', [rfReplaceAll]) + // Заменяем пробелы на "%20", чтобы передать их в пути
+    '<a href="#view=' + URLEncode(MenuCats.Strings[i]) +
     '">' + ExtractFileName(MenuCats.Strings[i]) + '</a>';
 
   // Если пароль введен показываем скрытые категории
   if ShowHiddenCats then begin
     for i:=0 to HiddenMenuCats.Count - 1 do
       WebView.OleObject.Document.getElementById('menu').innerHTML:=WebView.OleObject.Document.getElementById('menu').innerHTML +
-      '<a href="#view=' + StringReplace(HiddenMenuCats.Strings[i], ' ', '%20', [rfReplaceAll]) + // Заменяем пробелы на "%20", чтобы передать их в пути
+      '<a href="#view=' + URLEncode(HiddenMenuCats.Strings[i]) +
       '">' + ExtractFileName(HiddenMenuCats.Strings[i]) + '</a>';
   end else
   // Показываем значок скрытых категорий
@@ -250,7 +402,7 @@ begin
   if Pos(StyleMainFile + '#view=', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#view=', sUrl) + 5);
     CurCat:=sUrl;
-    CurCat:=StringReplace(CurCat, '%20', ' ', [rfReplaceAll]); // Возвращаем пробелы назад (пробелы в пути URL)
+    CurCat:=URLDecode(CurCat);
     // При изменении категории останавливать поиск
     BreakScaning:=true;
 
@@ -259,20 +411,19 @@ begin
 
   if Pos(StyleMainFile + '#open=', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#open=', sUrl) + 5);
-    sUrl:=StringReplace(sUrl, '%20', ' ', [rfReplaceAll]);
+    sUrl:=URLDecode(sUrl);
     CurDir:=CurCat + '\' + sURL;
     ShellExecute(Handle, 'open', PChar(CurDir), nil, nil, SW_SHOW);
   end;
 
   if Pos(StyleMainFile + '#openInfo=', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#openInfo=', sUrl) + 9);
-    sUrl:=StringReplace(sUrl, '%20', ' ', [rfReplaceAll]);
+    sUrl:=URLDecode(sUrl);
     CurDir:=CurCat + '\' + sURL;
     CurItem:=sUrl;
     if DescriptionForm.Showing then
       DescriptionForm.Close;
     DescriptionForm.Show;
-
   end;
 
   if (sUrl = StyleMainFile + '#showHidden') and InputQuery(IDS_TITLE, IDS_PASS_QUESTION, sValue) and (sValue = Password) then begin
@@ -311,12 +462,6 @@ begin
   else if FileExists(CurCat + '\' + ItemName + '\coversmall.gif') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.gif'
   else if FileExists(CurCat + '\' + ItemName + '\coversmall.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.jpeg'
   else if FileExists(CurCat + '\' + ItemName + '\coversmall.hpic') then CoverImage:=CurCat + '\' + ItemName + '\coversmall.hpic'
-
-  else if FileExists(CurCat + '\' + ItemName + '\cover-small.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpg'
-  else if FileExists(CurCat + '\' + ItemName + '\cover-small.png') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.png'
-  else if FileExists(CurCat + '\' + ItemName + '\cover-small.gif') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.gif'
-  else if FileExists(CurCat + '\' + ItemName + '\cover-small.jpeg') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.jpeg'
-  else if FileExists(CurCat + '\' + ItemName + '\cover-small.hpic') then CoverImage:=CurCat + '\' + ItemName + '\cover-small.hpic'
 
   else if FileExists(CurCat + '\' + ItemName + '\cover.jpg') then CoverImage:=CurCat + '\' + ItemName + '\cover.jpg'
   else if FileExists(CurCat + '\' + ItemName + '\cover.png') then CoverImage:=CurCat + '\' + ItemName + '\cover.png'

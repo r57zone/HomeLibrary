@@ -72,7 +72,7 @@ object SettingsForm: TSettingsForm
     Height = 113
     ItemHeight = 13
     PopupMenu = PopupMenuFolder2
-    TabOrder = 3
+    TabOrder = 4
   end
   object AddHdnPathBtn: TButton
     Left = 376
@@ -80,7 +80,7 @@ object SettingsForm: TSettingsForm
     Width = 75
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100
-    TabOrder = 4
+    TabOrder = 5
     OnClick = AddHdnPathBtnClick
   end
   object RemHdnPathBtn: TButton
@@ -89,7 +89,7 @@ object SettingsForm: TSettingsForm
     Width = 75
     Height = 25
     Caption = #1059#1076#1072#1083#1080#1090#1100
-    TabOrder = 5
+    TabOrder = 6
     OnClick = RemHdnPathBtnClick
   end
   object PasswordEdt: TEdit
@@ -98,7 +98,7 @@ object SettingsForm: TSettingsForm
     Width = 161
     Height = 21
     PasswordChar = '*'
-    TabOrder = 6
+    TabOrder = 8
   end
   object OkBtn: TButton
     Left = 8
@@ -106,7 +106,7 @@ object SettingsForm: TSettingsForm
     Width = 75
     Height = 25
     Caption = 'OK'
-    TabOrder = 7
+    TabOrder = 11
     OnClick = OkBtnClick
   end
   object CancelBtn: TButton
@@ -115,7 +115,7 @@ object SettingsForm: TSettingsForm
     Width = 75
     Height = 25
     Caption = #1054#1090#1084#1077#1085#1072
-    TabOrder = 8
+    TabOrder = 12
     OnClick = CancelBtnClick
   end
   object Button5: TButton
@@ -124,7 +124,7 @@ object SettingsForm: TSettingsForm
     Width = 25
     Height = 25
     Caption = '?'
-    TabOrder = 9
+    TabOrder = 13
     OnClick = Button5Click
   end
   object SwapMouseFuncCB: TCheckBox
@@ -141,11 +141,39 @@ object SettingsForm: TSettingsForm
     Width = 185
     Height = 17
     Caption = #1044#1086#1087#1086#1083#1085#1080#1090#1077#1083#1100#1085#1099#1077' '#1082#1085#1086#1087#1082#1080
-    TabOrder = 11
+    TabOrder = 9
   end
-  object PopupMenuFolder: TPopupMenu
+  object CoversBtn: TButton
     Left = 376
     Top = 88
+    Width = 75
+    Height = 25
+    Caption = #1054#1073#1083#1086#1078#1082#1080
+    TabOrder = 3
+    OnClick = CoversBtnClick
+  end
+  object Covers2Btn: TButton
+    Left = 376
+    Top = 224
+    Width = 75
+    Height = 25
+    Caption = #1054#1073#1083#1086#1078#1082#1080
+    TabOrder = 7
+    OnClick = Covers2BtnClick
+  end
+  object UseCoverTemplatesCB: TCheckBox
+    Left = 224
+    Top = 328
+    Width = 225
+    Height = 41
+    Caption = #1048#1089#1087#1086#1083#1100#1079#1086#1074#1072#1090#1100' '#1096#1072#1073#1083#1086#1085#1099' '#1076#1083#1103' '#1086#1073#1083#1086#1078#1077#1082
+    TabOrder = 14
+    WordWrap = True
+    OnClick = UseCoverTemplatesCBClick
+  end
+  object PopupMenuFolder: TPopupMenu
+    Left = 336
+    Top = 104
     object MoveFolderUpBtn: TMenuItem
       Caption = #1055#1077#1088#1077#1084#1077#1089#1090#1080#1090#1100' '#1074#1099#1096#1077
       OnClick = MoveFolderUpBtnClick
@@ -156,8 +184,8 @@ object SettingsForm: TSettingsForm
     end
   end
   object PopupMenuFolder2: TPopupMenu
-    Left = 376
-    Top = 224
+    Left = 336
+    Top = 240
     object MoveFolderUpBtn2: TMenuItem
       Caption = #1055#1077#1088#1077#1084#1077#1089#1090#1080#1090#1100' '#1074#1099#1096#1077
       OnClick = MoveFolderUpBtn2Click

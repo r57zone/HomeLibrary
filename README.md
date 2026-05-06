@@ -6,34 +6,37 @@
 Catalog for movies, tv shows, games and books.
 
 ## Setup
-1. Add the necessary folders in the settings. Hidden folders are supported. The password for viewing them can be changed in the settings.
-2. Add posters or covers for your movies, TV shows, games, and books. To do this, add a file called "Cover" to the folder of the movie, game, TV tv shows or book. It is also recommended that you create a "CoverSmall", a smaller version so that the download is faster and the images are more enjoyable. Recommended sizes for "CoverSmall" posters or covers are as follows: for movies - 100x150, for new games - 100x133 and for old games - 100x100. You can automatically download covers in the program [MediaElch](https://github.com/Komet/MediaElch).
-3. Add, if necessary, a description for your movies, tv shows, games, and books. This can be done either manually by clicking on "+" and entering data from Wikipedia or automatically using the program [MediaElch](https://github.com/Komet/MediaElch) for movies and TV shows. For games and books you have to fill in manually, covers in good resolution can be downloaded using the Playnite program (will be in the program folder - "Playnite\library\files") or also manually. The description is stored in "NFO" files, movies and TV shows will be compatible with the "Kodi" shell.
-4. Add the necessary buttons to the description as necessary. By default, the "View" button is created for movies, the "Install" button for games, and the "Open" button for books and the "Open Folder" button for all categories. Additionally, you can create your own buttons, for example, to open a folder, application or file. There is an example of creating a button in the "NFO" file; if necessary, they are duplicated (the "button" sub-item, in the "buttons" item).
-5. Optionally, you can exchange the functionality of the right and left mouse buttons.
+1. Add the required folders in the settings. Hidden folders are supported. The password for viewing them can be changed in the settings.
+2. Add posters or covers for your movies, TV shows, games, and books. To do this, place a file named `Cover` in the folder of the movie, game, TV show, or book. It is also recommended to create `CoverSmall` — a smaller version, so loading is faster and images look cleaner. You can either create this file manually or select the desired folder in the settings and click the `Covers` button. Recommended sizes for `CoverSmall`: for movies — `100x150`, for newer games — `100x133`, for older games — `100x100`. Covers can be downloaded automatically using MediaElch (https://github.com/Komet/MediaElch).
+3. Add descriptions for your movies, TV shows, games, and books if needed. This can be done manually by clicking `+` and entering data, for example, from Wikipedia, or automatically using MediaElch (https://github.com/Komet/MediaElch) — for movies and TV shows. For games and books, descriptions must be filled in manually. High-resolution covers can be downloaded using the Playnite program (they are located in the program folder — `Playnite\library\files`) or manually. Descriptions are stored in `NFO` files; movies and TV shows will be compatible with the `Kodi` interface.
+4. By default, a `Watch` button is created for movies, an `Install` button for games, an `Open` button for books, as well as an `Open Folder` button for all categories. You can also create custom buttons, for example, to open a file, application, or folder. The `NFO` file contains an example of how to create a button; if needed, they can be duplicated (sub-item `button` in the `buttons` section).
+5. You can optionally swap the functions of the right and left mouse buttons.
 
 ## Features
-By default, `ISO`, `CUE`, `EXE` files and folders are automatically added to the description. You can disable this in the settings. To automount `ISO` and `CUE` images, you can install the [WinCDEmu program](https://wincdemu.sysprogs.org/).
+By default, files with extensions `EXE/MSI`, `MP4/AVI/MKV/MOV`, `ISO/CUE/MDS/NRG/CCD`, `PDF/DJVU/HTML/TXT/EPUB/FB2/RTF/DOC/DOCX/MOBI`, as well as folders, are automatically added to the description. This can be disabled in the settings. For automatic mounting of disk images, you can install WinCDEmu (https://wincdemu.sysprogs.org/).
 
+To modify automatically added buttons, you need to create a custom button, for example: `<button open="setup_dlc.exe">Addon</button>` in the `NFO` file.
 
-To rename automatically added buttons, you need to create a button yourself, for example - `<button open="setup_dlc.exe">DLC</button>`.
-
-
-To hide a button, you can add a button named `hidden`, for example - `<button open="setup2.exe">hidden</button>`.
-
-## Download
->Version for Windows 7, 8.1, 10.
-
-[Download](https://github.com/r57zone/Home-library/releases)
+To hide a specific button, add a button with the name `hidden`, for example: `<button open="setup2.exe">hidden</button>`.
 
 ## Screenshots
-![](https://user-images.githubusercontent.com/9499881/71446104-4277fb80-2739-11ea-8d18-6574a1de4973.png)
+<a href="https://user-images.githubusercontent.com/9499881/71446104-4277fb80-2739-11ea-8d18-6574a1de4973.png">
+<img src="https://user-images.githubusercontent.com/9499881/71446104-4277fb80-2739-11ea-8d18-6574a1de4973.png" height="150px" />
+</a>
+<a href="https://user-images.githubusercontent.com/9499881/71446154-ad293700-2739-11ea-8be8-f4ae43b7f686.png">
+<img src="https://user-images.githubusercontent.com/9499881/71446154-ad293700-2739-11ea-8be8-f4ae43b7f686.png" height="150px" />
+</a>
+<a href="https://user-images.githubusercontent.com/9499881/71446166-c7631500-2739-11ea-9d1b-e26a5b92ffdb.png">
+<img src="https://user-images.githubusercontent.com/9499881/71446166-c7631500-2739-11ea-9d1b-e26a5b92ffdb.png" height="150px" />
+</a>
+<a href="https://user-images.githubusercontent.com/9499881/71446243-90d9ca00-273a-11ea-91b6-145253e34131.png">
+<img src="https://user-images.githubusercontent.com/9499881/71446243-90d9ca00-273a-11ea-91b6-145253e34131.png" height="150px" />
+</a>
 
-![](https://user-images.githubusercontent.com/9499881/71446154-ad293700-2739-11ea-8be8-f4ae43b7f686.png)
+## Download
+>Supports Windows 7, 8, 8.1, 10, 11.
 
-![](https://user-images.githubusercontent.com/9499881/71446166-c7631500-2739-11ea-9d1b-e26a5b92ffdb.png)
-
-![](https://user-images.githubusercontent.com/9499881/71446243-90d9ca00-273a-11ea-91b6-145253e34131.png)
+[Download](https://github.com/r57zone/Home-library/releases)
 
 ## Feedback
 `r57zone[at]gmail.com`
