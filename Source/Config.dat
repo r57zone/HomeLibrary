@@ -4,7 +4,8 @@ Password=
 SwapMouseButtons=0
 UseCoverTemplates=0
 AdditionalButtons=1
-CatFolders=
+FirstRun=1
+CatFolders=C:\Games
 CatHiddenFolders=
 
 [Viewer]
