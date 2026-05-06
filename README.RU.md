@@ -3,6 +3,20 @@
 # Home Library
 Каталог для фильмов, сериалов, игр и книг.
 
+## Скриншоты
+<a href="https://user-images.githubusercontent.com/9499881/71445771-0ee7a200-2736-11ea-8b98-54ac77f88548.png">
+<img src="https://user-images.githubusercontent.com/9499881/71445771-0ee7a200-2736-11ea-8b98-54ac77f88548.png" height="150px" />
+</a>
+<a href="https://user-images.githubusercontent.com/9499881/71445804-59691e80-2736-11ea-9180-b4588a18ab86.png">
+<img src="https://user-images.githubusercontent.com/9499881/71445804-59691e80-2736-11ea-9180-b4588a18ab86.png" height="150px" />
+</a>
+<a href="https://user-images.githubusercontent.com/9499881/71445966-0f813800-2738-11ea-9883-1469a7992a16.png">
+<img src="https://user-images.githubusercontent.com/9499881/71445966-0f813800-2738-11ea-9883-1469a7992a16.png" height="150px" />
+</a>
+<a href="https://user-images.githubusercontent.com/9499881/71445983-2a53ac80-2738-11ea-81f5-e8b8a6d4858b.png">
+<img src="https://user-images.githubusercontent.com/9499881/71445983-2a53ac80-2738-11ea-81f5-e8b8a6d4858b.png" height="150px" />
+</a>
+
 ## Настройка
 1. Добавьте нужные папки в настройках. Поддерживаются скрытые папки. Пароль для их просмотра можно изменить в настройках.
 2. Добавьте постеры или обложки для ваших фильмов, сериалов, игр и книг. Для этого нужно добавить файл с названием `Cover` в папку фильма, игры, сериала или книги. Также рекомендуется создать `CoverSmall` - уменьшенную версию, чтобы загрузка была быстрее, а изображения выглядели более аккуратно. Для этого можно либо вручную создать файл, либо в настройках выбрать нужную папку и нажать кнопку `Обложки`. Рекомендуемые размеры для `CoverSmall`: для фильмов — `100x150`, для новых игр — `100x133`, для старых игр — `100x100`. Обложки можно загрузить автоматически с помощью программы MediaElch (https://github.com/Komet/MediaElch).
@@ -18,20 +32,6 @@
 
 
 Для скрытия какой-либо кнопки, можно добавить кнопку с имененм `hidden`, например - `<button open="setup2.exe">hidden</button>`.
-
-## Скриншоты
-<a href="https://user-images.githubusercontent.com/9499881/71445771-0ee7a200-2736-11ea-8b98-54ac77f88548.png">
-<img src="https://user-images.githubusercontent.com/9499881/71445771-0ee7a200-2736-11ea-8b98-54ac77f88548.png" height="150px" />
-</a>
-<a href="https://user-images.githubusercontent.com/9499881/71445804-59691e80-2736-11ea-9180-b4588a18ab86.png">
-<img src="https://user-images.githubusercontent.com/9499881/71445804-59691e80-2736-11ea-9180-b4588a18ab86.png" height="150px" />
-</a>
-<a href="https://user-images.githubusercontent.com/9499881/71445966-0f813800-2738-11ea-9883-1469a7992a16.png">
-<img src="https://user-images.githubusercontent.com/9499881/71445966-0f813800-2738-11ea-9883-1469a7992a16.png" height="150px" />
-</a>
-<a href="https://user-images.githubusercontent.com/9499881/71445983-2a53ac80-2738-11ea-81f5-e8b8a6d4858b.png">
-<img src="https://user-images.githubusercontent.com/9499881/71445983-2a53ac80-2738-11ea-81f5-e8b8a6d4858b.png" height="150px" />
-</a>
 
 ## Загрузка
 >Поддерживается Windows 7, 8, 8.1, 10, 11.
